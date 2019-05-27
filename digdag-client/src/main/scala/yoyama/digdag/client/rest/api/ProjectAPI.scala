@@ -7,7 +7,7 @@ import yoyama.digdag.client.http.HttpClientAkka
 import yoyama.digdag.client.rest.model.{ProjectRest, WorkflowRest}
 import yoyama.digdag.client.DigdagServerInfo
 
-class ProjectAPI()(implicit val httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+class ProjectAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
 
   def getProjects():Future[Try[List[ProjectRest]]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
@@ -33,7 +33,7 @@ class ProjectAPI()(implicit val httpClient: HttpClientAkka, srvInfo:DigdagServer
     responseF.flatMap(_.asString()).map(WorkflowRest.toWorkflows(_))
   }
 
-  def getWorkflow(name:String)(implicit prjId:Long): Future[Try[WorkflowRest]] = ???
+  def getWorkflow(name:String)(): Future[Try[WorkflowRest]] = ???
 
 }
 

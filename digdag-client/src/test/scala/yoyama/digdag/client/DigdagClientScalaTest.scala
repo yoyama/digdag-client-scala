@@ -9,7 +9,7 @@ class DigdagClientScalaTest  extends FlatSpec with Matchers {
   val client = DigdagClient(srvInfo)
 
   "projects" should "succeed" in {
-    val prj = client.getProjects()
+    val prj = client.projects()
     println(prj)
   }
 }

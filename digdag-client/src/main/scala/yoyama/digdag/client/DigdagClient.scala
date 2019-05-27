@@ -3,8 +3,8 @@ package yoyama.digdag.client
 import java.net.URI
 
 import yoyama.digdag.client.http.HttpClientAkka
-import yoyama.digdag.client.rest.api.ProjectAPI
-import yoyama.digdag.client.rest.model.{ProjectRest, WorkflowRest}
+import yoyama.digdag.client.rest.api.{ProjectAPI, SessionAPI}
+import yoyama.digdag.client.rest.model.{ProjectRest, SessionRest, WorkflowRest}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -17,16 +17,23 @@ object DigdagServerInfo {
 
 
 
-class DigdagClient()(implicit val srvInfo:DigdagServerInfo) {
+class DigdagClient(apiWait:FiniteDuration = 30 second)(implicit val srvInfo:DigdagServerInfo) {
   implicit val httpClientAkka = new HttpClientAkka
-  implicit val projectAPI = new ProjectAPI
+  implicit val projectAPI = new ProjectAPI(httpClientAkka, srvInfo)
+  implicit val sessionAPI = new SessionAPI(httpClientAkka, srvInfo)
 
-  def getProjects():Seq[ProjectRest] = {
-    Await.result(projectAPI.getProjects(), 30 second).get
+  def projects(): Seq[ProjectRest] = {
+    Await.result(projectAPI.getProjects(), apiWait).get
   }
 
-  def getWorkflows(prjId:Long):Seq[WorkflowRest] = {
-    Await.result(projectAPI.getWorkflows(prjId), 30 second).get
+  def workflows(prjId: Long): Seq[WorkflowRest] = {
+    Await.result(projectAPI.getWorkflows(prjId), apiWait).get
+  }
+
+  def workflows(prj: ProjectRest): Seq[WorkflowRest] = workflows(prj.id.toLong)
+
+  def sessions(): Seq[SessionRest] = {
+    Await.result(sessionAPI.getSessions(), apiWait).get
   }
 }
 
