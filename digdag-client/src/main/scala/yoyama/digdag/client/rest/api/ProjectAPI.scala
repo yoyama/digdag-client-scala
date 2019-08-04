@@ -27,13 +27,18 @@ class ProjectAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     responseF.flatMap(_.asString()).map(ProjectRest.toProject(_))
   }
 
+  def getProject(name:String):Future[Try[ProjectRest]] = {
+    val apiPath = srvInfo.endPoint.toString + "/api/project"
+    val queries = Map("name" -> name)
+    val responseF = httpClient.callGet(apiPath, queries)
+    responseF.flatMap(_.asString()).map(ProjectRest.toProject(_))
+  }
+
   def getWorkflows(prjId:Long): Future[Try[List[WorkflowRest]]] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/workflows"
     val responseF = httpClient.callGet(apiPath)
     responseF.flatMap(_.asString()).map(WorkflowRest.toWorkflows(_))
   }
-
-  def getWorkflow(name:String)(): Future[Try[WorkflowRest]] = ???
 
 }
 

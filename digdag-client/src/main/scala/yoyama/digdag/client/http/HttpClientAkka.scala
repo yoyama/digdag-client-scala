@@ -1,7 +1,7 @@
 package yoyama.digdag.client.http
 
+import scala.language.postfixOps
 import akka.actor.ActorSystem
-import akka.http.javadsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader

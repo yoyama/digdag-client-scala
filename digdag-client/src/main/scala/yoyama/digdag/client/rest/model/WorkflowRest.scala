@@ -9,6 +9,7 @@ case class  WorkflowRest(id:String, name:String, projectId:String, projectName:S
                         revision:String, timezone:String, config:String)
 
 object WorkflowRest extends ModelUtils {
+
   implicit val workflowReads: Reads[WorkflowRest] = (
     (JsPath \ "id").read[String] and
       (JsPath \ "name").read[String] and
