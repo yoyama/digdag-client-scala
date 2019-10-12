@@ -30,7 +30,8 @@ class HttpClientAkka {
   //val convJSON =  (res:HttpResponse) => Unmarshal(res.entity).to[String]
 
   def callGet(uri: String, queries: Map[String, String] = Map(),
-              headers: Map[String, String] = Map()) : Future[HttpClientAkkaResponse] = httpRequest(GET, uri, queries, headers)
+              headers: Map[String, String] = Map()
+             ) : Future[HttpClientAkkaResponse] = httpRequest(GET, uri, queries, headers)
 
   def httpRequest(webMethod: HttpMethod, uri: String, queries:Map[String, String], headers: Map[String, String], requestBody: String = ""):Future[HttpClientAkkaResponse] = {
 

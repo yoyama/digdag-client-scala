@@ -18,7 +18,8 @@ lazy val client = (project in file("digdag-client"))
       "org.wvlet.airframe" %% "airframe-codec" % "19.7.1",
       "com.typesafe.play" %% "play-json" % "2.7.3",
       "org.scalactic" %% "scalactic" % "3.0.8",
-      "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+      "org.scalamock" %% "scalamock" % "4.4.0" % Test
     )
   )
 

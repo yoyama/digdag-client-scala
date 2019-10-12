@@ -19,8 +19,7 @@ object DigdagServerInfo {
 
 
 
-class DigdagClient()(implicit val srvInfo:DigdagServerInfo) {
-  implicit val httpClientAkka = new HttpClientAkka
+class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:DigdagServerInfo) {
   implicit val projectAPI = new ProjectAPI(httpClientAkka, srvInfo)
   implicit val workflowAPI = new WorkflowAPI(httpClientAkka, srvInfo)
   implicit val sessionAPI = new SessionAPI(httpClientAkka, srvInfo)
@@ -74,6 +73,11 @@ class DigdagClient()(implicit val srvInfo:DigdagServerInfo) {
 object DigdagClient {
   def apply(srvInfo:DigdagServerInfo = DigdagServerInfo.local): DigdagClient = {
     //ToDo connection check
-    new DigdagClient()(srvInfo)
+    new DigdagClient()(new HttpClientAkka, srvInfo)
+  }
+
+  def apply(httpClient:HttpClientAkka, srvInfo:DigdagServerInfo): DigdagClient = {
+    //ToDo connection check
+    new DigdagClient()(httpClient, srvInfo)
   }
 }
