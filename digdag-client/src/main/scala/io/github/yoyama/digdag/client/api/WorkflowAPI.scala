@@ -18,5 +18,14 @@ class WorkflowAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     val responseF = httpClient.callGet(apiPath, queries)
     responseF.flatMap(_.asString()).map(WorkflowRest.toWorkflows(_))
   }
+
+  def getWorkflow(id:Long):Future[Try[WorkflowRest]] = {
+    val apiPath = srvInfo.apiEndPoint(s"/api/workflows/${id}")
+    val responseF = httpClient.callGet(apiPath)
+    responseF.flatMap(_.asString()).map(x => {
+      println(x);
+      WorkflowRest.toWorkflow(x)
+    })
+  }
 }
 

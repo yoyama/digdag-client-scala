@@ -40,5 +40,13 @@ class ProjectAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     responseF.flatMap(_.asString()).map(WorkflowRest.toWorkflows(_))
   }
 
+  def getWorkflow(prjId:Long, workflowName:String, revision:Option[String] = None): Future[Try[WorkflowRest]] = {
+    val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/workflows/${workflowName}"
+    val queries = Map[String,Option[String]]("revision" -> revision)
+      .filter(x => x._2.nonEmpty)
+      .map(x => (x._1, x._2.get))
+    val responseF = httpClient.callGet(apiPath, queries)
+    responseF.flatMap(_.asString()).map(WorkflowRest.toWorkflow(_))
+  }
 }
 

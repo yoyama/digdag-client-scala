@@ -6,7 +6,7 @@ import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 case class  WorkflowRest(id:String, name:String, projectId:String, projectName:String,
-                        revision:String, timezone:String, config:String)
+                        revision:String, timezone:String, config:JsValue)
 
 object WorkflowRest extends ModelUtils {
 
@@ -17,15 +17,17 @@ object WorkflowRest extends ModelUtils {
       (JsPath \ "project" \ "name").read[String] and
       (JsPath \ "revision").read[String] and
       (JsPath \ "timezone").read[String]
-      and jsonStringRead
+      and
+      (JsPath \ "config").read[JsValue]
+      //and jsonStringRead
     ) (WorkflowRest.apply _)
 
   def toWorkflows(response:String):Try[List[WorkflowRest]] = {
     for {
       parsed: JsValue <- catching(classOf[Throwable]) withTry Json.parse(response)
       lists: JsArray <- toJsArray(parsed("workflows"))
-      projects <- toWorkflows(lists)
-    } yield projects
+      workflows <- toWorkflows(lists)
+    } yield workflows
   }
 
   def toWorkflows(jsonArray:JsArray):Try[List[WorkflowRest]] = {
@@ -34,6 +36,23 @@ object WorkflowRest extends ModelUtils {
       case e:JsError => Failure(new Throwable(e.toString))
     }
   }
+
+  def toWorkflow(response:String):Try[WorkflowRest] = {
+    for {
+      parsed: JsValue <- catching(classOf[Throwable]) withTry Json.parse(response)
+      workflow <- toWorkflow(parsed)
+    } yield workflow
+  }
+
+
+  def toWorkflow(json:JsValue):Try[WorkflowRest] = {
+    println(json.toString())
+    json.validate[WorkflowRest] match {
+      case JsSuccess(v, p) => Success(v)
+      case e:JsError => Failure(new Throwable(e.toString))
+    }
+  }
+
 }
 
 
