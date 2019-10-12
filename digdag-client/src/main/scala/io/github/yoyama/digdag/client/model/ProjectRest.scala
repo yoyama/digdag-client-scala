@@ -1,4 +1,4 @@
-package yoyama.digdag.client.rest.model
+package io.github.yoyama.digdag.client.model
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._

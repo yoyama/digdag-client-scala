@@ -1,10 +1,9 @@
-package yoyama.digdag.client
+package io.github.yoyama.digdag.client
 
 import java.net.URI
 
-import yoyama.digdag.client.http.HttpClientAkka
-import yoyama.digdag.client.rest.api.{ProjectAPI, SessionAPI, WorkflowAPI}
-import yoyama.digdag.client.rest.model.{ProjectRest, SessionRest, WorkflowRest}
+import io.github.yoyama.digdag.client.api.{ProjectAPI, SessionAPI, WorkflowAPI}
+import io.github.yoyama.digdag.client.model.{ProjectRest, SessionRest, WorkflowRest}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

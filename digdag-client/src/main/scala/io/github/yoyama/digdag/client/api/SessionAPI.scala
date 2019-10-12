@@ -1,8 +1,7 @@
-package yoyama.digdag.client.rest.api
+package io.github.yoyama.digdag.client.api
 
-import yoyama.digdag.client.DigdagServerInfo
-import yoyama.digdag.client.http.HttpClientAkka
-import yoyama.digdag.client.rest.model.{ProjectRest, SessionRest, WorkflowRest}
+import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka}
+import io.github.yoyama.digdag.client.model.{ProjectRest, SessionRest, WorkflowRest}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

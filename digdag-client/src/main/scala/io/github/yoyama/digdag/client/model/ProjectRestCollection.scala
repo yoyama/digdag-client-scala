@@ -1,4 +1,4 @@
-package yoyama.digdag.client.rest.model
+package io.github.yoyama.digdag.client.model
 
 class ProjectRestCollection(val projects:List[ProjectRest]) {
   def filter(filter:String):List[ProjectRest] = ???

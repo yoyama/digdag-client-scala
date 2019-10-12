@@ -1,6 +1,6 @@
-package yoyama.digdag.client
+package io.github.yoyama.digdag.client
 
-import java.net.{URI, URL}
+import java.net.URI
 
 import org.scalatest._
 

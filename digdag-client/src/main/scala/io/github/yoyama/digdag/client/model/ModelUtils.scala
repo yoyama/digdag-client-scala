@@ -1,4 +1,4 @@
-package yoyama.digdag.client.rest.model
+package io.github.yoyama.digdag.client.model
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter

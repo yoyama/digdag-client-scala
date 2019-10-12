@@ -1,4 +1,4 @@
-package yoyama.digdag.client.rest.model
+package io.github.yoyama.digdag.client.model
 
 import org.scalatest.{FlatSpec, Matchers}
 

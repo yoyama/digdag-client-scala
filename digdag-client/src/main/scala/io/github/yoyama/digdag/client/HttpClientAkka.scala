@@ -1,19 +1,19 @@
-package yoyama.digdag.client.http
+package io.github.yoyama.digdag.client
 
-import scala.language.postfixOps
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.Uri.Query
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class HttpClientAkkaResponse(val res: HttpResponse)(implicit val mat:ActorMaterializer) {
   def asString(): Future[String] = {

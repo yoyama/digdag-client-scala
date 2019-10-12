@@ -1,11 +1,11 @@
-package yoyama.digdag.client.rest.api
+package io.github.yoyama.digdag.client.api
+
+import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
-import yoyama.digdag.client.http.HttpClientAkka
-import yoyama.digdag.client.rest.model.{ProjectRest, WorkflowRest}
-import yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
 
 class ProjectAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
 
