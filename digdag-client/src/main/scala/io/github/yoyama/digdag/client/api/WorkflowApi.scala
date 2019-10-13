@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
-class WorkflowAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+class WorkflowApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
 
   def getWorkflows(lastId:Option[Long] = None, count:Option[Long] = None):Future[Try[List[WorkflowRest]]] = {
     val apiPath = srvInfo.apiEndPoint("/api/workflows")

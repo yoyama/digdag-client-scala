@@ -7,7 +7,7 @@ import scala.concurrent.Future
 import scala.util.Try
 import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
 
-class ProjectAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+class ProjectApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
 
   def getProjects():Future[Try[List[ProjectRest]]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"

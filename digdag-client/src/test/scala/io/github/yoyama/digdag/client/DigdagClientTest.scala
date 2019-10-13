@@ -39,7 +39,7 @@ class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
   trait Fixture {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
-    val srvInfo = DigdagServerInfo(new URI("http://localhost:65432"))
+    val srvInfo = DigdagServerInfo("http://localhost:65432")
     val httpAkka = mock[HttpClientAkka]
     val client = DigdagClient(httpAkka, srvInfo)
 

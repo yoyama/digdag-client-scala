@@ -29,12 +29,13 @@ class HttpClientAkka {
   val convString =  (res:HttpResponse) => Unmarshal(res.entity).to[String]
   //val convJSON =  (res:HttpResponse) => Unmarshal(res.entity).to[String]
 
-  def callGet(uri: String, queries: Map[String, String] = Map(),
+  def callGet(uri: String,
+              queries: Map[String, String] = Map(),
               headers: Map[String, String] = Map()
              ) : Future[HttpClientAkkaResponse] = httpRequest(GET, uri, queries, headers)
 
-  def httpRequest(webMethod: HttpMethod, uri: String, queries:Map[String, String], headers: Map[String, String], requestBody: String = ""):Future[HttpClientAkkaResponse] = {
-
+  def httpRequest(webMethod: HttpMethod, uri: String, queries:Map[String, String], headers: Map[String, String],
+                  requestBody: String = ""):Future[HttpClientAkkaResponse] = {
     val rawHeaders = headers.map {
       case (k, v) => {
         RawHeader(k, v)

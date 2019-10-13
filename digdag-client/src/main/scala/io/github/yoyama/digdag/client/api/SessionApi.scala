@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
-class SessionAPI(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+class SessionApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
 
   def getSessions():Future[Try[List[SessionRest]]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/sessions"

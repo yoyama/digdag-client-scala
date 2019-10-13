@@ -2,27 +2,29 @@ package io.github.yoyama.digdag.client
 
 import java.net.URI
 
-import io.github.yoyama.digdag.client.api.{ProjectAPI, SessionAPI, WorkflowAPI}
+import io.github.yoyama.digdag.client.api.{ProjectApi, SessionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.model.{ProjectRest, SessionRest, WorkflowRest}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
-case class DigdagServerInfo(endPoint:URI, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) {
+case class DigdagServerInfo(endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
   def apiEndPoint(uriPart:String): String = endPoint.toString + uriPart
 }
 
 object DigdagServerInfo {
-  def local = new DigdagServerInfo(new URI("http://localhost:65432"))
+  def apply(uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new DigdagServerInfo(new URI(uri), auth, apiWait)
+
+  def local = DigdagServerInfo("http://localhost:65432")
 }
 
 
 
 class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:DigdagServerInfo) {
-  implicit val projectAPI = new ProjectAPI(httpClientAkka, srvInfo)
-  implicit val workflowAPI = new WorkflowAPI(httpClientAkka, srvInfo)
-  implicit val sessionAPI = new SessionAPI(httpClientAkka, srvInfo)
+  implicit val projectAPI = new ProjectApi(httpClientAkka, srvInfo)
+  implicit val workflowAPI = new WorkflowApi(httpClientAkka, srvInfo)
+  implicit val sessionAPI = new SessionApi(httpClientAkka, srvInfo)
 
   val apiWait = srvInfo.apiWait
 
