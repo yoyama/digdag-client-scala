@@ -37,7 +37,7 @@ object SessionRest extends ModelUtils {
       and (JsPath \ "finishedAt").readNullable[String]
     )(LastAttempt.apply _)
 
-  implicit val rootReads: Reads[SessionRest] = (
+  implicit val sessionReads: Reads[SessionRest] = (
     (JsPath \ "id").read[String]
       and (JsPath \ "project").read[IdAndName]
       and (JsPath \ "workflow").read[IdAndName]

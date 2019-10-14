@@ -70,7 +70,7 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   def sessions(prjName:String, wfName:String): Option[Seq[SessionRest]] = syncOpt(sessionApi.getSessions())
 
-  def session(id:Long): Option[SessionRest] = ???
+  def session(id:Long): Option[SessionRest] = syncOpt(sessionApi.getSession(id))
 }
 
 object DigdagClient {
