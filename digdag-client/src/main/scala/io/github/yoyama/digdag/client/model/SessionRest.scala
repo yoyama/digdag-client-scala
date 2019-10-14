@@ -8,17 +8,6 @@ import play.api.libs.functional.syntax._
 import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
-/**
-  *
-  * (f: (Long, Option[String], Boolean, Boolean, Boolean, play.api.libs.json.JsValue, String, Option[String]) => B)
-  * (implicit fu: play.api.libs.functional.Functor[play.api.libs.json.Reads])play.api.libs.json.Reads[B]
-  * cannot be applied to
-  * ((String, Option[String], Boolean, Boolean, Boolean, play.api.libs.json.JsValue, String, Option[String])
-  *     => io.github.yoyama.digdag.client.model.SessionRest.LastAttempt)
-  * [error]       and (JsPath \ "finishedAt").readNullable[String]
-  * [error]       ^
-  **/
-
 case class SessionRest(id: String, project: IdAndName, workflow: IdAndName, uuid: String,
                 sessionTime: OffsetDateTime, lastAttempt: Option[SessionRest.LastAttempt])
 
