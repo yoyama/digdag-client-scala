@@ -10,6 +10,8 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 trait ModelUtils {
+  val dateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss[.SSSSSSSSS][.SSSSSS][.SSS][xxx][xx][X]")
+
   def toJsArray(v:JsValue):Try[JsArray] = v match {
     case v1:JsArray => Success(v1)
     case v2 => Failure(new Throwable("Invalid json type:" + v2.toString()))
@@ -28,10 +30,9 @@ trait ModelUtils {
   }
 
 
-  val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss[.SSSSSSSSS][.SSSSSS][.SSS][xxx][xx][X]")
   implicit val jsonOffsetDateTimeRead  = new Reads[OffsetDateTime] {
     override def reads(json: JsValue): JsResult[OffsetDateTime] = {
-      JsSuccess(OffsetDateTime.parse(json.as[String], formatter))
+      JsSuccess(OffsetDateTime.parse(json.as[String], dateTimeFormatter))
     }
   }
 
@@ -48,7 +49,7 @@ trait ModelUtils {
   }
 
   implicit val jsonIdAndNameRead: Reads[IdAndName] = (
-        (JsPath \ "id").read[Option[Long]] and
+        (JsPath \ "id").read[Option[String]] and
         (JsPath \ "name").read[Option[String]]
     )(IdAndName.apply _)
 }
