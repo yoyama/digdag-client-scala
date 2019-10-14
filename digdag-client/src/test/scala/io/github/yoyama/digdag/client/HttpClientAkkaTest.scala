@@ -4,6 +4,8 @@ import org.scalatest._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.language.postfixOps
+
 
 class HttpClientAkkaTest extends FlatSpec with Matchers {
 

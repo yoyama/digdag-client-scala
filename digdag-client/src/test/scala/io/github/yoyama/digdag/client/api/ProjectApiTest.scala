@@ -1,18 +1,16 @@
 package io.github.yoyama.digdag.client.api
 
-import akka.http.scaladsl.Http.ServerBinding
 import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka, HttpClientAkkaResponse}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import akka.http.scaladsl.marshalling.ToResponseMarshaller
-import akka.http.scaladsl.unmarshalling.Unmarshaller
 import com.twitter.finagle.http.Response
 import wvlet.airframe.http.Router
 import wvlet.airframe.http.finagle.FinagleServer
 
 import scala.util.{Failure, Success}
+import scala.language.postfixOps
 
 
 
