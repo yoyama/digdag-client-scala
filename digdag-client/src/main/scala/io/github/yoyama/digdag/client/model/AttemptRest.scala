@@ -9,10 +9,10 @@ import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 
-case class AttemptRest(id: String, index:Long,  project: IdAndName, workflow: IdAndName,
-                       sessionId:String, sessionUuid: String, sessionTime: OffsetDateTime,
+case class AttemptRest(id: String, index:Long,  project:IdAndName, workflow:IdAndName,
+                       sessionId:String, sessionUuid:String, sessionTime:OffsetDateTime,
                        retryAttemptName: Option[String], done: Boolean, success: Boolean,
-                       cancelRequested: Boolean, params: JsValue,
+                       cancelRequested:Boolean, params:JsValue,
                        createdAt:OffsetDateTime, finishedAt:Option[OffsetDateTime])
 
 object AttemptRest extends ModelUtils {

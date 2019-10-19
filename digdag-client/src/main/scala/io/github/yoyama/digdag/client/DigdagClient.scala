@@ -2,7 +2,7 @@ package io.github.yoyama.digdag.client
 
 import java.net.URI
 
-import io.github.yoyama.digdag.client.api.{ProjectApi, SessionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest, WorkflowRest}
 
 import scala.concurrent.{Await, Future}
@@ -26,6 +26,7 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
   implicit val projectApi = new ProjectApi(httpClientAkka, srvInfo)
   implicit val workflowApi = new WorkflowApi(httpClientAkka, srvInfo)
   implicit val sessionApi = new SessionApi(httpClientAkka, srvInfo)
+  implicit val attemptApi = new AttemptApi(httpClientAkka, srvInfo)
 
   val apiWait = srvInfo.apiWait
 
@@ -74,11 +75,13 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   def attempts(sessionId:Long): Option[Seq[AttemptRest]] = syncOpt(sessionApi.getAttempts(sessionId))
 
-  def attempts(prjName:String, wfName:String): Option[Seq[AttemptRest]] = ???
+  def attempts(prjName:String, wfName:String, includeRetried:Boolean = false,
+               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Option[Seq[AttemptRest]]
+                            = syncOpt(attemptApi.getAttempts(prjName, wfName))
 
-  def attempt(id:Long): Option[AttemptRest] = ???
+  def attempt(id:Long): Option[AttemptRest] = syncOpt(attemptApi.getAttempt(id))
 
-  def reries(attemptId:Long) = ???
+  def retries(attemptId:Long): Option[List[AttemptRest]] = syncOpt(attemptApi.getAttemptRetries(attemptId))
 
   def tasks(attemptId:Long) = ???
 
