@@ -1,6 +1,6 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest}
+import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest, TaskRest}
 import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +35,11 @@ class AttemptApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     responseF.flatMap(_.asString()).map(AttemptRest.toAttempts(_))
   }
 
-  //def getTasks
+  def getTasks(id:Long):Future[Try[List[TaskRest]]] = {
+    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/tasks"
+    val responseF = httpClient.callGet(apiPath)
+    responseF.flatMap(_.asString()).map(TaskRest.toTasks(_))
+  }
 
   //def startAttempt
 

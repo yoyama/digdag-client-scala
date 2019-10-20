@@ -3,7 +3,7 @@ package io.github.yoyama.digdag.client
 import java.net.URI
 
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
-import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest, WorkflowRest}
+import io.github.yoyama.digdag.client.model._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
@@ -83,7 +83,7 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   def retries(attemptId:Long): Option[List[AttemptRest]] = syncOpt(attemptApi.getAttemptRetries(attemptId))
 
-  def tasks(attemptId:Long) = ???
+  def tasks(attemptId:Long): Option[List[TaskRest]] = syncOpt(attemptApi.getTasks(attemptId))
 
   def doKill(attemptId:Long) = ???
 
@@ -91,9 +91,21 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   //def doStart
 
-  //def doUpdateSchedule
+  //def schedules
+
+  //def schedule
+
+  //def doScheduleUpdate
+  //def doScheduleBackfill
+  //def doScheduleSkip
+  //def doScheduleEnable
+  //def doScheduleDisable
 
   //def do(Add|Del)Secrets
+
+  //def logFiles(projId)
+  //def logDownload(projId)
+
 }
 
 object DigdagClient {
