@@ -1,6 +1,7 @@
 package io.github.yoyama.digdag.client
 
 import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.model._
@@ -30,11 +31,11 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   val apiWait = srvInfo.apiWait
 
-  def syncOpt[T](x:Future[Try[T]]): Option[T] = {
-    Await.result(x, apiWait) match {
-      case Success(value) => Some(value)
-      case Failure(exception) => None
+  def syncOpt[T](x:Future[T]): Option[T] = {
+    val f = x.map(Option(_)).recover {
+      case _ => None
     }
+    Await.result(f, srvInfo.apiWait)
   }
 
   def projects(): Seq[ProjectRest] = syncOpt(projectApi.getProjects()).getOrElse(Seq.empty)

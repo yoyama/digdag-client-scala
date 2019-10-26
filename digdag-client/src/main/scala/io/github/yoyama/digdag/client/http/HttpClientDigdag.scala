@@ -19,18 +19,18 @@ import scala.util.{Failure, Success, Try}
 
 trait HttpClientDigdag[REQ,RES] {
   def callGet(uri: String, queries: Map[String, String] = Map(),
-              headers: Map[String, String] = Map()) : Future[Try[HttpResponse[RES]]]
+              headers: Map[String, String] = Map()) : Future[HttpResponse[RES]]
 
   def callPost(uri: String, contentType:String, content:String,
                queries: Map[String, String] = Map(),
-               headers: Map[String, String] = Map()) : Future[Try[HttpResponse[RES]]]
+               headers: Map[String, String] = Map()) : Future[HttpResponse[RES]]
 
   def callPut(uri: String, contentType:String, content:String,
                queries: Map[String, String] = Map(),
-               headers: Map[String, String] = Map()) : Future[Try[HttpResponse[RES]]]
+               headers: Map[String, String] = Map()) : Future[HttpResponse[RES]]
 
   def callDelete(uri: String, queries: Map[String, String] = Map(),
-              headers: Map[String, String] = Map()) : Future[Try[HttpResponse[RES]]]
+              headers: Map[String, String] = Map()) : Future[HttpResponse[RES]]
 
 
   def sendRequest(request: HttpRequest[REQ]):Future[HttpResponse[RES]]
@@ -46,24 +46,28 @@ class HttpClientAkkaHttp() (implicit val actorSystem:ActorSystem, val mat: Actor
   import adapters.{HttpRequestAkkaHttpAdapter => reqAdapter}
 
   override def callGet(uri: String, queries: Map[String, String] = Map(),
-                       headers: Map[String, String] = Map()): Future[Try[HttpResponse[AkkaHttpResponse]]] = {
+                       headers: Map[String, String] = Map()): Future[HttpResponse[AkkaHttpResponse]] = {
     val r: Try[Future[HttpResponse[AkkaHttpResponse]]] = for {
       req <- createRequest("GET", uri, queries, headers, None, None)
       resp <- (catching(classOf[Throwable]) either sendRequest(reqAdapter.httpRequestOf(req))).toTry
     } yield resp
-    r.toFutureTry()
+
+    r match {
+      case Success(value) => value
+      case Failure(e) => Future.failed(e)
+    }
   }
 
   override def callPost(uri: String, contentType:String, content:String,
                queries: Map[String, String] = Map(),
-               headers: Map[String, String] = Map()) : Future[Try[HttpResponse[AkkaHttpResponse]]] = ???
+               headers: Map[String, String] = Map()) : Future[HttpResponse[AkkaHttpResponse]] = ???
 
   override def callPut(uri: String, contentType:String, content:String,
               queries: Map[String, String] = Map(),
-              headers: Map[String, String] = Map()) : Future[Try[HttpResponse[AkkaHttpResponse]]] = ???
+              headers: Map[String, String] = Map()) : Future[HttpResponse[AkkaHttpResponse]] = ???
 
   override def callDelete(uri: String, queries: Map[String, String] = Map(),
-                 headers: Map[String, String] = Map()) : Future[Try[HttpResponse[AkkaHttpResponse]]] = ???
+                 headers: Map[String, String] = Map()) : Future[HttpResponse[AkkaHttpResponse]] = ???
 
   protected def createRequest(method: String, uri: String, queries: Map[String, String], headers: Map[String, String],
                               contentType: Option[String] = None, body: Option[String] = None): Try[AkkaHttpRequest] = {

@@ -5,7 +5,6 @@ import scala.language.postfixOps
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentType => AkkaContentType, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethod => AkkaHttpMethod, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, MediaTypes => AkkaMediaTypes, Uri => AkkaUri}
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
 import org.scalatest.{FlatSpec, Matchers}
 import wvlet.airframe.http.HttpMethod
 import wvlet.airframe.http.finagle.FinagleServer
@@ -49,19 +48,19 @@ class HttpClientDigdagTest extends FlatSpec with Matchers {
       design.build[FinagleServer] { server =>
         val client = new HttpClientAkkaHttp()
         val responseF = client.callGet(s"http://localhost:${serverPort}/api/projects")
-        val responseT = Await.result(responseF, 60 seconds)
-        responseT match {
-          case Success(r) => {
-            println(r.status)
-            println(r.contentType)
-            println(r.contentString)
-            assert(r.status.code == 200)
-            assert(r.contentType.isDefined)
-            assert(r.contentType.get == "application/json")
-            assert(r.contentString.contains("projects"))
+        responseF.onComplete( _ match {
+          case Success(v) => {
+            println(v.status)
+            println(v.contentType)
+            println(v.contentString)
+            assert(v.status.code == 200)
+            assert(v.contentType.isDefined)
+            assert(v.contentType.get == "application/json")
+            assert(v.contentString.contains("projects"))
           }
-          case Failure(t) => assert(false)
-        }
+          case Failure(ex) => assert(false)
+        })
+        val response = Await.result(responseF, 60 seconds)
       }
     }
   }
