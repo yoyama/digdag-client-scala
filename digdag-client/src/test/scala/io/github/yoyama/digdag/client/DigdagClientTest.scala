@@ -1,22 +1,31 @@
 package io.github.yoyama.digdag.client
 
-import java.net.URI
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import io.github.yoyama.digdag.client.http.{HttpClientAdapters4AkkaHttp, HttpClientAkkaHttp}
 import org.scalatest._
 import org.scalamock.scalatest.MockFactory
+import wvlet.airframe.http.HttpResponse
+import wvlet.log.LogSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import akka.http.scaladsl.model.{ContentType => AkkaContentType, ContentTypes => AkkaContentTypes, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethod => AkkaHttpMethod, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, MediaTypes => AkkaMediaTypes, Uri => AkkaUri}
+
+import scala.language.postfixOps
+import scala.concurrent.duration._
 
 class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
 
   "projects" should "succeed" in {
     new Fixture {
-      (httpAkka.callGet _).expects("http://localhost:65432/api/projects", *, *).returns(Future {
-        new HttpClientAkkaResponse(null)(materializer){
-          override def asString(): Future[String] = Future{
+      import adapters._
+      (httpClient.callGet _).expects("http://localhost:65432/api/projects", *, *).returns(Future {
+        new HttpResponse[AkkaHttpResponse] {
+          override def adapter = HttpResponseAkkaHttpAdapter
+          override def toRaw: AkkaHttpResponse = null
+          override def contentString: String =
             """ { "projects" : [
             { "id":"1",
               "name":"test-proj1",
@@ -28,7 +37,7 @@ class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
               "archiveMd5":"cCkGbCesb17xjWYNV0GXmg=="
             } ] }
             """.stripMargin
-          }
+
         }
       })
       val prj = client.projects()
@@ -39,9 +48,13 @@ class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
   trait Fixture {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
+    implicit val timeout = 60 seconds
+
+    val adapters = new HttpClientAdapters4AkkaHttp()
     val srvInfo = DigdagServerInfo("http://localhost:65432")
-    val httpAkka = mock[HttpClientAkka]
-    val client = DigdagClient(httpAkka, srvInfo)
+    val httpClient = mock[HttpClientAkkaHttp]
+    val client = DigdagClient(httpClient, srvInfo)
 
   }
 }
+

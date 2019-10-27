@@ -5,8 +5,7 @@ import java.time.OffsetDateTime
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import scala.util.control.Exception._
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 
 case class AttemptRest(id: String, index:Long,  project:IdAndName, workflow:IdAndName,

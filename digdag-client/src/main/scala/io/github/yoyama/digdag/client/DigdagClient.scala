@@ -2,12 +2,16 @@ package io.github.yoyama.digdag.client
 
 import java.net.URI
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
-import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest, WorkflowRest}
+import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
+import io.github.yoyama.digdag.client.model._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
 import scala.language.postfixOps
 
 case class DigdagServerInfo(endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
@@ -22,19 +26,19 @@ object DigdagServerInfo {
 
 
 
-class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:DigdagServerInfo) {
-  implicit val projectApi = new ProjectApi(httpClientAkka, srvInfo)
-  implicit val workflowApi = new WorkflowApi(httpClientAkka, srvInfo)
-  implicit val sessionApi = new SessionApi(httpClientAkka, srvInfo)
-  implicit val attemptApi = new AttemptApi(httpClientAkka, srvInfo)
+class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:DigdagServerInfo) {
+  implicit val projectApi = new ProjectApi(httpClient, srvInfo)
+  implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
+  implicit val sessionApi = new SessionApi(httpClient, srvInfo)
+  implicit val attemptApi = new AttemptApi(httpClient, srvInfo)
 
   val apiWait = srvInfo.apiWait
 
-  def syncOpt[T](x:Future[Try[T]]): Option[T] = {
-    Await.result(x, apiWait) match {
-      case Success(value) => Some(value)
-      case Failure(exception) => None
+  def syncOpt[T](x:Future[T]): Option[T] = {
+    val f = x.map(Option(_)).recover {
+      case _ => None
     }
+    Await.result(f, srvInfo.apiWait)
   }
 
   def projects(): Seq[ProjectRest] = syncOpt(projectApi.getProjects()).getOrElse(Seq.empty)
@@ -83,7 +87,7 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   def retries(attemptId:Long): Option[List[AttemptRest]] = syncOpt(attemptApi.getAttemptRetries(attemptId))
 
-  def tasks(attemptId:Long) = ???
+  def tasks(attemptId:Long): Option[List[TaskRest]] = syncOpt(attemptApi.getTasks(attemptId))
 
   def doKill(attemptId:Long) = ???
 
@@ -91,19 +95,35 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
   //def doStart
 
-  //def doUpdateSchedule
+  //def schedules
+
+  //def schedule
+
+  //def doScheduleUpdate
+  //def doScheduleBackfill
+  //def doScheduleSkip
+  //def doScheduleEnable
+  //def doScheduleDisable
 
   //def do(Add|Del)Secrets
+
+  //def logFiles(projId)
+  //def logDownload(projId)
+
 }
 
 object DigdagClient {
   def apply(srvInfo:DigdagServerInfo = DigdagServerInfo.local): DigdagClient = {
-    //ToDo connection check
-    new DigdagClient()(new HttpClientAkka, srvInfo)
+    implicit val timeout = 60 seconds
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
+    new DigdagClient()(new HttpClientAkkaHttp(), srvInfo)
   }
 
-  def apply(httpClient:HttpClientAkka, srvInfo:DigdagServerInfo): DigdagClient = {
-    //ToDo connection check
+  def apply(httpClient:HttpClientAkkaHttp, srvInfo:DigdagServerInfo): DigdagClient = {
+    implicit val timeout = srvInfo.apiWait
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
     new DigdagClient()(httpClient, srvInfo)
   }
 }

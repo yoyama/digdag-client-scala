@@ -3,9 +3,6 @@ package io.github.yoyama.digdag.client.model
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-import io.github.yoyama.digdag.client.model.AttemptRest.toJsArray
-import play.api.libs.json._
-
 import scala.util.{Failure, Success, Try}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._

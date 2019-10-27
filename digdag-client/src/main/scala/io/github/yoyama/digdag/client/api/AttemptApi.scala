@@ -1,17 +1,18 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest}
-import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka}
+import io.github.yoyama.digdag.client.model.{AttemptRest, TaskRest}
+import io.github.yoyama.digdag.client.{DigdagServerInfo}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Try
+import io.github.yoyama.digdag.client.commons.Helpers.{HttpClientDigdagHelper}
 
-class AttemptApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
+
+class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
 
   val apiPathPart = "/api/attempts"
   def getAttempts(prjName:String, wfName:String, includeRetried:Boolean = false, lastId:Option[Long] = None,
-                  pageSize:Option[Long] = None):Future[Try[List[AttemptRest]]] = {
+                  pageSize:Option[Long] = None):Future[List[AttemptRest]] = {
     val queriesPart: Map[String, String] =
       Seq(("last_id", lastId), ("page_size", pageSize))
         .filter(_._2.isDefined)            //remove None
@@ -19,23 +20,23 @@ class AttemptApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
         .toMap                             //Map[String,String]
     val queries = queriesPart + (("include_retried", includeRetried.toString))
     val apiPath = srvInfo.endPoint.toString + apiPathPart
-    val responseF = httpClient.callGet(apiPath, queries = queries)
-    responseF.flatMap(_.asString()).map(AttemptRest.toAttempts(_))
+    httpClient.callGetToRest(apiPath, queries, AttemptRest.toAttempts _)
   }
 
-  def getAttempt(id:Long):Future[Try[AttemptRest]] = {
+  def getAttempt(id:Long):Future[AttemptRest] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}"
-    val responseF = httpClient.callGet(apiPath)
-    responseF.flatMap(_.asString()).map(AttemptRest.toAttempt(_))
+    httpClient.callGetToRest(apiPath, Map.empty, AttemptRest.toAttempt _)
   }
 
-  def getAttemptRetries(id:Long):Future[Try[List[AttemptRest]]] = {
+  def getAttemptRetries(id:Long):Future[List[AttemptRest]] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/retries"
-    val responseF = httpClient.callGet(apiPath)
-    responseF.flatMap(_.asString()).map(AttemptRest.toAttempts(_))
+    httpClient.callGetToRest(apiPath, Map.empty, AttemptRest.toAttempts _)
   }
 
-  //def getTasks
+  def getTasks(id:Long):Future[List[TaskRest]] = {
+    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/tasks"
+    httpClient.callGetToRest(apiPath, Map.empty, TaskRest.toTasks _)
+  }
 
   //def startAttempt
 
