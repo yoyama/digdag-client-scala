@@ -1,14 +1,14 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka}
-import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest, WorkflowRest}
+import io.github.yoyama.digdag.client.{DigdagServerInfo}
+import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest}
 import io.github.yoyama.digdag.client.commons.Helpers.TryHelper
+import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Try
 
-class SessionApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
+class SessionApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
 
   def getSessions(lastId:Option[Long] = None, pageSize:Option[Long] = None):Future[List[SessionRest]] = {
     val queries =
@@ -19,8 +19,7 @@ class SessionApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     val apiPath = srvInfo.endPoint.toString + "/api/sessions"
     for {
       r1 <- httpClient.callGet(apiPath, queries)
-      r2 <- r1.asString()
-      r3 <- SessionRest.toSessions(r2).toFuture
+      r3 <- SessionRest.toSessions(r1.contentString).toFuture
     } yield r3
   }
 
@@ -28,8 +27,7 @@ class SessionApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     val apiPath = srvInfo.endPoint.toString + s"/api/sessions/${id}"
     for {
       r1 <- httpClient.callGet(apiPath)
-      r2 <- r1.asString()
-      r3 <- SessionRest.toSession(r2).toFuture
+      r3 <- SessionRest.toSession(r1.contentString).toFuture
     } yield r3
   }
 
@@ -37,8 +35,7 @@ class SessionApi(httpClient: HttpClientAkka, srvInfo:DigdagServerInfo){
     val apiPath = srvInfo.endPoint.toString + s"/api/sessions/${id}/attempts"
     for {
       r1 <- httpClient.callGet(apiPath)
-      r2 <- r1.asString()
-      r3 <- AttemptRest.toAttempts(r2).toFuture
+      r3 <- AttemptRest.toAttempts(r1.contentString).toFuture
     } yield r3
   }
 }

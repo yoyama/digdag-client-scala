@@ -38,7 +38,7 @@ trait HttpClientDigdag[REQ,RES] {
 
 class HttpClientAkkaHttp() (implicit val actorSystem:ActorSystem, val mat: ActorMaterializer,
                         val execContext:ExecutionContext, val timeout: Duration)
-  extends HttpClientDigdag[AkkaHttpRequest, AkkaHttpResponse] with LogSupport {
+  extends HttpClientDigdag[AkkaHttpRequest, AkkaHttpResponse] {
 
   val adapters = new HttpClientAdapterAkkaHttp
 

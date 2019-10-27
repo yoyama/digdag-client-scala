@@ -1,14 +1,17 @@
 package io.github.yoyama.digdag.client
 
 import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
 import io.github.yoyama.digdag.client.model._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
 import scala.language.postfixOps
 
 case class DigdagServerInfo(endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
@@ -23,11 +26,11 @@ object DigdagServerInfo {
 
 
 
-class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:DigdagServerInfo) {
-  implicit val projectApi = new ProjectApi(httpClientAkka, srvInfo)
-  implicit val workflowApi = new WorkflowApi(httpClientAkka, srvInfo)
-  implicit val sessionApi = new SessionApi(httpClientAkka, srvInfo)
-  implicit val attemptApi = new AttemptApi(httpClientAkka, srvInfo)
+class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:DigdagServerInfo) {
+  implicit val projectApi = new ProjectApi(httpClient, srvInfo)
+  implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
+  implicit val sessionApi = new SessionApi(httpClient, srvInfo)
+  implicit val attemptApi = new AttemptApi(httpClient, srvInfo)
 
   val apiWait = srvInfo.apiWait
 
@@ -111,12 +114,16 @@ class DigdagClient()(implicit val httpClientAkka:HttpClientAkka, val srvInfo:Dig
 
 object DigdagClient {
   def apply(srvInfo:DigdagServerInfo = DigdagServerInfo.local): DigdagClient = {
-    //ToDo connection check
-    new DigdagClient()(new HttpClientAkka, srvInfo)
+    implicit val timeout = 60 seconds
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
+    new DigdagClient()(new HttpClientAkkaHttp(), srvInfo)
   }
 
-  def apply(httpClient:HttpClientAkka, srvInfo:DigdagServerInfo): DigdagClient = {
-    //ToDo connection check
+  def apply(httpClient:HttpClientAkkaHttp, srvInfo:DigdagServerInfo): DigdagClient = {
+    implicit val timeout = srvInfo.apiWait
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
     new DigdagClient()(httpClient, srvInfo)
   }
 }

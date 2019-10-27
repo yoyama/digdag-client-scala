@@ -1,25 +1,31 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.{DigdagServerInfo, HttpClientAkka, HttpClientAkkaResponse}
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import io.github.yoyama.digdag.client.{DigdagServerInfo}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await}
 import scala.concurrent.duration._
 import com.twitter.finagle.http.Response
+import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
 import io.github.yoyama.digdag.client.model.ProjectRest
 import wvlet.airframe.http.Router
 import wvlet.airframe.http.finagle.FinagleServer
 
-import scala.util.{Failure, Success}
 import scala.language.postfixOps
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class ProjectApiTest  extends FlatSpec with Matchers {
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
+  implicit val timeout = 60 seconds
   val serverPort = 55432
   val endPointURL = s"http://localhost:${serverPort}/api"
   val srvInfo = DigdagServerInfo(s"http://localhost:${serverPort}")
-  val httpClient = new HttpClientAkka
+  val httpClient = new HttpClientAkkaHttp()
   val api =  new ProjectApi(httpClient, srvInfo)
 
   "Simple airframe test" should "succeed" in {
