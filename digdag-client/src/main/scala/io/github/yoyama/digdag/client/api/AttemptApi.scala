@@ -1,12 +1,13 @@
 package io.github.yoyama.digdag.client.api
 
 import io.github.yoyama.digdag.client.model.{AttemptRest, TaskRest}
-import io.github.yoyama.digdag.client.{DigdagServerInfo}
+import io.github.yoyama.digdag.client.DigdagServerInfo
 
 import scala.concurrent.Future
-import io.github.yoyama.digdag.client.commons.Helpers.{HttpClientDigdagHelper}
-
+import io.github.yoyama.digdag.client.commons.Helpers.HttpClientDigdagHelper
 import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
+import io.github.yoyama.digdag.client.model.request.AttemptRequestRest
+import play.api.libs.json.Json
 
 class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
 
@@ -38,8 +39,11 @@ class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
     httpClient.callGetToRest(apiPath, Map.empty, TaskRest.toTasks _)
   }
 
-  //def startAttempt
+  def startAttempt(workflowId:Long, sessionTime:Long, retryAttemptName:Option[String] = None,
+                   resumeAttemptId:Option[Long], resumeMode:Option[String] = None, paramsJson:Option[String]): Future[AttemptRest] = {
+    val areq = AttemptRequestRest(workflowId, sessionTime, retryAttemptName, resumeAttemptId, resumeMode, paramsJson.map(Json.toJson(_)))
 
-
+    ???
+  }
 }
 
