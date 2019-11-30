@@ -1,15 +1,16 @@
 package io.github.yoyama.digdag.client.model
 
 import scala.language.postfixOps
-import java.time.OffsetDateTime
+import java.time.{Instant, OffsetDateTime}
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+
 import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 case class SessionRest(id: String, project: IdAndName, workflow: IdAndName, uuid: String,
-                sessionTime: OffsetDateTime, lastAttempt: Option[SessionRest.LastAttempt])
+                sessionTime: Instant, lastAttempt: Option[SessionRest.LastAttempt])
 
 object SessionRest extends ModelUtils {
   case class LastAttempt(id: String, retryAttemptName: Option[String], done: Boolean, success: Boolean,
@@ -31,7 +32,7 @@ object SessionRest extends ModelUtils {
       and (JsPath \ "project").read[IdAndName]
       and (JsPath \ "workflow").read[IdAndName]
       and (JsPath \ "sessionUuid").read[String]
-      and (JsPath \ "sessionTime").read[OffsetDateTime]
+      and (JsPath \ "sessionTime").read[Instant]
       and (JsPath \ "lastAttempt").readNullable[LastAttempt]
     )(SessionRest.apply _)
 

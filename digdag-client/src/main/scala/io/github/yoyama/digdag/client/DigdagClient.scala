@@ -1,6 +1,7 @@
 package io.github.yoyama.digdag.client
 
 import java.net.URI
+import java.time.Instant
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -26,7 +27,7 @@ object DigdagServerInfo {
 
 
 
-class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:DigdagServerInfo) {
+class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:DigdagServerInfo) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, srvInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
   implicit val sessionApi = new SessionApi(httpClient, srvInfo)
@@ -93,7 +94,14 @@ class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:Dig
 
   //def doPush
 
-  //def doStart
+  def doStart(prjName:String, wfName:String, session:Option[String] = None): Option[AttemptRest] = {
+    def getSession = session.map(toInstant(_)).getOrElse(Instant.now())
+    val ret: Future[Future[AttemptRest]] = for {
+      prj <- projectApi.getProject(prjName)
+      wf <- projectApi.getWorkflow(Integer.parseInt(prj.id), wfName)
+    } yield attemptApi.startAttempt(Integer.parseInt(wf.id), getSession)
+    syncOpt(ret.flatMap(x=>x))
+  }
 
   //def schedules
 

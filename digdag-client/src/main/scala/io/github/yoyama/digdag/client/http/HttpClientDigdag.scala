@@ -51,8 +51,8 @@ trait HttpClientDigdag[REQ,RESP] {
   }
 
   def callPut(uri: String, contentType:String, content:String,
-               queries: Map[String, String],
-               headers: Map[String, String]) : Future[HttpResponse[RESP]] = {
+               queries: Map[String, String] = Map(),
+               headers: Map[String, String] = Map()) : Future[HttpResponse[RESP]] = {
     val r = for {
       req <- createRequest("PUT",  uri, queries, headers, Option(contentType), Option(content))
       resp <- sendRequest(reqAdapter.httpRequestOf(req))
@@ -60,7 +60,7 @@ trait HttpClientDigdag[REQ,RESP] {
     r
   }
 
-  def callPut(uri: String, contentType:String, contentPath:Path,
+  def callPutFile(uri: String, contentType:String, contentPath:Path,
               queries: Map[String, String] = Map(),
               headers: Map[String, String] = Map()) : Future[HttpResponse[RESP]] = {
     val r = for {

@@ -1,6 +1,6 @@
 package io.github.yoyama.digdag.client.model
 
-import java.time.OffsetDateTime
+import java.time.{Instant, OffsetDateTime}
 import java.time.format.DateTimeFormatter
 
 import scala.util.{Failure, Success, Try}
@@ -46,7 +46,9 @@ trait ModelUtils {
     }
   }
 
-
+  def toInstant(dt:String): Instant = {
+    OffsetDateTime.parse(dt, dateTimeFormatter).toInstant
+  }
   implicit val jsonStringRead  = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = {
       JsSuccess(json.as[String])
@@ -58,7 +60,6 @@ trait ModelUtils {
       JsSuccess(json.as[Long])
     }
   }
-
 
   implicit val jsonOffsetDateTimeRead  = new Reads[OffsetDateTime] {
     override def reads(json: JsValue): JsResult[OffsetDateTime] = {

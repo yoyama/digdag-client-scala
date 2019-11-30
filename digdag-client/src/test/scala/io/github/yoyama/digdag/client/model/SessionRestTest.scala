@@ -64,7 +64,7 @@ class SessionRestTest extends FlatSpec with Matchers {
     sessions match {
       case Success(ss) => {
         assert(ss.size == 2)
-        assert(ss.head.sessionTime ==  OffsetDateTime.parse( "2019-05-02T15:12:38+00:00", SessionRest.dateTimeFormatter))
+        assert(ss.head.sessionTime ==  OffsetDateTime.parse( "2019-05-02T15:12:38+00:00", SessionRest.dateTimeFormatter).toInstant)
         assert(ss.head.lastAttempt.isDefined)
         assert(ss.head.lastAttempt.get.id == "7")
         assert(ss.head.lastAttempt.get.retryAttemptName.isEmpty)
