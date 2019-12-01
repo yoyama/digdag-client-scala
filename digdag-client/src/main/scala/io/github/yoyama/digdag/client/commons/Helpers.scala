@@ -1,7 +1,7 @@
 package io.github.yoyama.digdag.client.commons
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.github.yoyama.digdag.client.http.HttpClientDigdag
+import io.github.yoyama.digdag.client.http.{HttpClientDigdag}
 import wvlet.airframe.http.HttpResponse
 
 import scala.concurrent.Future
@@ -39,7 +39,7 @@ object Helpers {
     }
   }
 
-  implicit class HttpResponseHelper[REQ, RESP](resp:HttpResponse[RESP]) {
+  implicit class HttpResponseHelper[RESP](resp:HttpResponse[RESP]) {
 
     def toRest[T](funcToRest:String=>Try[T]):Future[T] = {
       for {
@@ -47,4 +47,5 @@ object Helpers {
       } yield r1
     }
   }
+
 }

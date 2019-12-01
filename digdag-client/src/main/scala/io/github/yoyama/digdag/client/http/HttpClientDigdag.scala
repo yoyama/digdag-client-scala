@@ -1,16 +1,13 @@
 package io.github.yoyama.digdag.client.http
 
-import java.io.File
 import java.nio.file.Path
 
 import scala.util.control.Exception._
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.Multipart.FormData
 import akka.http.scaladsl.model.Uri.{Query => AkkaQuery}
 import akka.http.scaladsl.model.headers.{RawHeader => AkkaRawHeader}
-import akka.http.scaladsl.model.{ErrorInfo, Multipart, RequestEntity, ContentType => AkkaContentType, ContentTypes => AkkaContentTypes, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, Uri => AkkaUri}
-import akka.http.scaladsl.server.ContentNegotiator.Alternative.MediaType
+import akka.http.scaladsl.model.{ErrorInfo, Multipart, RequestEntity, StatusCode, ContentType => AkkaContentType, ContentTypes => AkkaContentTypes, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, Uri => AkkaUri}
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.http.scaladsl.{Http, model => akkaModel}
 import akka.stream.ActorMaterializer
@@ -24,9 +21,19 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
+case class HttpResponseException[RESP <: HttpResponse[_]](val resp:RESP) extends Throwable
+
+sealed abstract class ResultStatus(val code:Int)
+object ResultStatus {
+  case object SUCCESS extends ResultStatus(0)
+  case object FAIL_DESER extends ResultStatus(1)
+  case object FAIL_HTTP extends ResultStatus(2)
+  case object FAIL_OTHERS extends ResultStatus(99)
+}
+
+
 trait HttpClientDigdag[REQ,RESP] {
   implicit val ec:ExecutionContext
-
 
   def reqAdapter:HttpRequestAdapter[REQ]
   def respAdapter:HttpResponseAdapter[RESP]
@@ -144,8 +151,12 @@ class HttpClientAkkaHttp() (implicit val actorSystem:ActorSystem, val mat: Actor
 
   override protected def sendRequest(request: HttpRequest[AkkaHttpRequest]): Future[HttpResponse[AkkaHttpResponse]] = {
     val response: Future[HttpResponse[AkkaHttpResponse]] = Http()
-      .singleRequest(request.toRaw)
-      .map((r: AkkaHttpResponse) => respAdapter.httpResponseOf(r))
+        .singleRequest(request.toRaw)
+        .map((r: AkkaHttpResponse) => respAdapter.httpResponseOf(r))
+        .map( x => x.status match {
+          case v if(200 <= v.code && v.code <= 299 ) => x
+          case v => throw HttpResponseException(x)
+        })
     response
   }
 
