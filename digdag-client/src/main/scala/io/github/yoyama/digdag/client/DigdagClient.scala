@@ -33,7 +33,7 @@ object DigdagServerInfo {
 // FAIL_DESER => resp, error
 // FAIL_HTTP  => resp, error
 // FAIL_OTHERS => error
-case class HttpResult[DATA,RESP <: HttpResponse[_]](result:ResultStatus, data:Option[DATA], resp:Option[RESP], error:Option[Throwable] = None) extends Throwable
+case class HttpResult[DATA,RESP <: HttpResponse[_]](result:ResultStatus, data:Option[DATA], resp:Option[RESP],   error:Option[Throwable] = None) extends Throwable
 
 object HttpResult {
   def apply[DATA, RESP <:HttpResponse[_]](resp:Future[(DATA,RESP)], await:FiniteDuration)

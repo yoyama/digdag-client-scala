@@ -13,8 +13,9 @@ import io.github.yoyama.digdag.client.model.request.AttemptRequestRest
 import play.api.libs.json.{JsObject, Json}
 import io.github.yoyama.digdag.client.commons.Helpers.HttpResponseHelper
 import wvlet.airframe.http.HttpResponse
+import wvlet.log.LogSupport
 
-class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
+class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo) extends LogSupport {
 
   val apiPathPart = "/api/attempts"
   def getAttempts(prjName:String, wfName:String, includeRetried:Boolean = false, lastId:Option[Long] = None,
@@ -47,13 +48,15 @@ class AttemptApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
   def startAttempt(workflowId:Long, sessionTime:Instant, retryAttemptName:Option[String] = None,
                    resumeAttemptId:Option[Long] = None, resumeMode:Option[String] = None,
                    paramsJson:Option[String] = None): Future[(AttemptRest,HttpResponse[_])] = {
+    logger.warn("startAttempt called")
     val params = paramsJson.map(Json.toJson(_)).getOrElse(JsObject.empty)
     val areq = AttemptRequestRest(workflowId, sessionTime, retryAttemptName, resumeAttemptId, resumeMode, params)
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}"
-    for {
+    val ret = for {
       resp <- httpClient.callPut(apiPath, "application/json", Json.toJson(areq).toString())
       data <- resp.toRest(AttemptRest.toAttempt _)
     } yield (data, resp)
+    ret
   }
 }
 

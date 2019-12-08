@@ -9,7 +9,6 @@ import org.scalamock.scalatest.MockFactory
 import wvlet.airframe.http.HttpResponse
 import wvlet.log.LogSupport
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import akka.http.scaladsl.model.{ContentType => AkkaContentType, ContentTypes => AkkaContentTypes, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethod => AkkaHttpMethod, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, MediaTypes => AkkaMediaTypes, Uri => AkkaUri}
 
@@ -49,6 +48,7 @@ class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
     implicit val timeout = 60 seconds
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     val adapters = new HttpClientAdapters4AkkaHttp()
     val srvInfo = DigdagServerInfo("http://localhost:65432")

@@ -10,7 +10,7 @@ ThisBuild / description      := "Scala client library for Digdag"
 ThisBuild / licenses         := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 ThisBuild / homepage         := Some(url("https://github.com/yoyama/digdag-client-scala"))
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature")
-//ThisBuild / cancelable in Global := true
+ThisBuild / cancelable in Global := true
 
 lazy val root = (project in file("."))
   .aggregate(client)
@@ -33,7 +33,7 @@ lazy val client = (project in file("digdag-client"))
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "org.scalamock" %% "scalamock" % "4.4.0" % Test
     ),
-    fork in run := true
+    //fork in run := true
   )
 
 

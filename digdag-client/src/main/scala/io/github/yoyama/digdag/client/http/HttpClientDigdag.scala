@@ -13,13 +13,15 @@ import akka.http.scaladsl.{Http, model => akkaModel}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
-import wvlet.airframe.http.{HttpMethod, HttpRequest, HttpRequestAdapter, HttpResponse, HttpResponseAdapter, HttpStatus}
+import wvlet.airframe.http._
 import wvlet.log.LogSupport
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
+
+
 
 case class HttpResponseException[RESP <: HttpResponse[_]](val resp:RESP) extends Throwable
 
@@ -98,9 +100,10 @@ trait HttpClientDigdag[REQ,RESP] {
   protected def sendRequest(request: HttpRequest[REQ]):Future[HttpResponse[RESP]]
 }
 
+
 class HttpClientAkkaHttp() (implicit val actorSystem:ActorSystem, val mat: ActorMaterializer,
-                        val execContext:ExecutionContext, val timeout: Duration)
-                                  extends HttpClientDigdag[AkkaHttpRequest, AkkaHttpResponse] {
+                            val execContext:ExecutionContext, val timeout: FiniteDuration)
+                                                        extends HttpClientDigdag[AkkaHttpRequest, AkkaHttpResponse] {
   import io.github.yoyama.digdag.client.commons.Helpers._
   override val ec = execContext
 
@@ -195,7 +198,7 @@ class HttpClientAkkaHttp() (implicit val actorSystem:ActorSystem, val mat: Actor
   }
 }
 
-class HttpClientAdapters4AkkaHttp()(implicit val mat:ActorMaterializer, val timeout:Duration) {
+class HttpClientAdapters4AkkaHttp()(implicit val mat:ActorMaterializer, val timeout:FiniteDuration, val ec: ExecutionContext) {
   implicit object HttpRequestAkkaHttpAdapter extends HttpRequestAdapter[AkkaHttpRequest] {
     import AkkaHttpHelper._
     override def methodOf(request: AkkaHttpRequest): HttpMethod          = method(request.method)
@@ -230,8 +233,15 @@ class HttpClientAdapters4AkkaHttp()(implicit val mat:ActorMaterializer, val time
   }
 
   implicit object AkkaHttpHelper {
-    def convertEntity[T](entity: AkkaHttpEntity)(implicit um: Unmarshaller[AkkaHttpEntity, T], mat:ActorMaterializer, timeout:Duration): T = {
-      Await.result(Unmarshal(entity).to[T], timeout)
+    def convertEntity[T](entity: AkkaHttpEntity)(implicit um: Unmarshaller[AkkaHttpEntity, T], mat:ActorMaterializer,
+                                                 ec: ExecutionContext, timeout:FiniteDuration): T = {
+      println(s"convertEntity called ${entity.contentType}")
+      Await.result(
+        for {
+          e1 <- entity.toStrict(timeout)
+          e2 <- Unmarshal(e1).to[T]
+        } yield e2
+        , timeout)
     }
 
     def contentType(message: AkkaHttpMessage): Option[String] = message.entity.contentType.value match {
