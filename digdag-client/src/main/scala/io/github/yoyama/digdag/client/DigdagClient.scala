@@ -8,16 +8,13 @@ import akka.stream.ActorMaterializer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
-import io.github.yoyama.digdag.client.http.{HttpClientAkkaHttp, HttpResponseException, ResultStatus}
+import io.github.yoyama.digdag.client.http._
 import io.github.yoyama.digdag.client.model._
-import wvlet.airframe.http.HttpResponse
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.language.postfixOps
-import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
-import akka.http.scaladsl.model.{ErrorInfo, Multipart, RequestEntity, StatusCode, ContentType => AkkaContentType, ContentTypes => AkkaContentTypes, HttpEntity => AkkaHttpEntity, HttpMessage => AkkaHttpMessage, HttpMethods => AkkaHttpMethods, HttpRequest => AkkaHttpRequest, HttpResponse => AkkaHttpResponse, Uri => AkkaUri}
 
 case class DigdagServerInfo(endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
   def apiEndPoint(uriPart:String): String = endPoint.toString + uriPart
@@ -29,26 +26,35 @@ object DigdagServerInfo {
   def local = DigdagServerInfo("http://localhost:65432")
 }
 
+case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
+
+sealed abstract class ResultStatus(val code:Int)
+object ResultStatus {
+  case object SUCCESS extends ResultStatus(0)
+  case object FAIL_DESER extends ResultStatus(1)
+  case object FAIL_HTTP extends ResultStatus(2)
+  case object FAIL_OTHERS extends ResultStatus(99)
+}
+
 // SUCCESS => data, resp
 // FAIL_DESER => resp, error
 // FAIL_HTTP  => resp, error
 // FAIL_OTHERS => error
-case class HttpResult[DATA,RESP <: HttpResponse[_]](result:ResultStatus, data:Option[DATA], resp:Option[RESP],   error:Option[Throwable] = None) extends Throwable
+case class HttpResult[DATA](result:ResultStatus, data:Option[DATA], resp:Option[SimpleHttpResponse[String]],   error:Option[Throwable] = None) extends Throwable
 
 object HttpResult {
-  def apply[DATA, RESP <:HttpResponse[_]](resp:Future[(DATA,RESP)], await:FiniteDuration)
-                                           (implicit tag:ClassTag[RESP]):HttpResult[DATA,RESP] = {
-    val f:Future[HttpResult[DATA,RESP]] = resp
+  def apply[DATA](resp:Future[(DATA, SimpleHttpResponse[String])], await:FiniteDuration):HttpResult[DATA] = {
+    val f:Future[HttpResult[DATA]] = resp
       .map(x => HttpResult(ResultStatus.SUCCESS, Option(x._1), Option(x._2), None))
       .recover {
-        case e: HttpResponseException[RESP] => HttpResult(ResultStatus.FAIL_HTTP, None, Option(e.resp), None)
+        case e: HttpResponseException => HttpResult(ResultStatus.FAIL_HTTP, None, Option(e.resp), None)
         case e: Throwable => HttpResult(ResultStatus.FAIL_OTHERS, None, None, Option(e))
       }
     Await.result(f, await)
   }
 }
 
-class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:DigdagServerInfo) extends ModelUtils {
+class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:DigdagServerInfo) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, srvInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
   implicit val sessionApi = new SessionApi(httpClient, srvInfo)
@@ -123,9 +129,9 @@ class DigdagClient()(implicit val httpClient:HttpClientAkkaHttp, val srvInfo:Dig
 
   //def doPush
 
-  def doStart(prjName:String, wfName:String, session:Option[String] = None): HttpResult[AttemptRest, HttpResponse[_]] = {
+  def doStart(prjName:String, wfName:String, session:Option[String] = None): HttpResult[AttemptRest] = {
     def getSession = session.map(toInstant(_)).getOrElse(Instant.now())
-    val ret: Future[(AttemptRest,HttpResponse[_])] = for {
+    val ret = for {
       prj <- projectApi.getProject(prjName)
       wf <- projectApi.getWorkflow(Integer.parseInt(prj.id), wfName)
       apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), getSession)
@@ -155,10 +161,10 @@ object DigdagClient {
     implicit val timeout = 60 seconds
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
-    new DigdagClient()(new HttpClientAkkaHttp(), srvInfo)
+    new DigdagClient()(new SimpleHttpClientScalaJ, srvInfo)
   }
 
-  def apply(httpClient:HttpClientAkkaHttp, srvInfo:DigdagServerInfo): DigdagClient = {
+  def apply(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo): DigdagClient = {
     implicit val timeout = srvInfo.apiWait
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()

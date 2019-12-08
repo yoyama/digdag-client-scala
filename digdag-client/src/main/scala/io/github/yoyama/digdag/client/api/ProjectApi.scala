@@ -1,14 +1,24 @@
 package io.github.yoyama.digdag.client.api
 
+import java.nio.file.Path
+
 import io.github.yoyama.digdag.client.DigdagServerInfo
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
-import io.github.yoyama.digdag.client.commons.Helpers.HttpClientDigdagHelper
-import io.github.yoyama.digdag.client.http.HttpClientAkkaHttp
+import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper, SimpleHttpClientHelper}
+import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
-class ProjectApi(httpClient: HttpClientAkkaHttp, srvInfo:DigdagServerInfo){
-  def pushProject(name:String, revision:Option[String], path:String): Future[ProjectRest] = ???
+class ProjectApi(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo)(implicit val ec:ExecutionContext){
+  def pushProject(name:String, revision:String, path:Path): Future[ProjectRest] = {
+    val apiPath = srvInfo.endPoint.toString + "/api/projects"
+    val queries = Map("project" -> name, "revision" -> revision)
+    for {
+      resp <- httpClient.callPutUpload(apiPath, "application/gzip", path, queries)
+      body <- resp.body.toFuture("No body data")
+      rest <- ProjectRest.toProject(body).toFuture()
+    } yield rest
+  }
 
   def getProjects():Future[List[ProjectRest]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"

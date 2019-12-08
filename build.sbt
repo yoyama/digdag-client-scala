@@ -16,23 +16,28 @@ lazy val root = (project in file("."))
   .aggregate(client)
   .settings(
     name := "digdag-client-scala",
+    testFrameworks += new TestFramework("wvlet.airspec.Framework")
+
   )
 
-lazy val airframeVersion = "19.10.1"
+lazy val airframeVersion = "19.12.3"
 lazy val client = (project in file("digdag-client"))  
   .settings(
     name := "client-lib",
     libraryDependencies ++= Seq(
+      "org.scalaj" %% "scalaj-http" % "2.4.2",
       "com.typesafe.akka" %% "akka-http"   % "10.1.8",
       "com.typesafe.akka" %% "akka-stream" % "2.5.23", // or whatever the latest version is
       "org.wvlet.airframe" %% "airframe-json" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-codec" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion,
+      "org.wvlet.airframe" %% "airspec" % airframeVersion % "test",
       "com.typesafe.play" %% "play-json" % "2.7.4",
       "org.scalactic" %% "scalactic" % "3.0.8",
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "org.scalamock" %% "scalamock" % "4.4.0" % Test
     ),
+    testFrameworks += new TestFramework("wvlet.airspec.Framework")
     //fork in run := true
   )
 
