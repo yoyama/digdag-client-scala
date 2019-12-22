@@ -2,19 +2,25 @@ package io.github.yoyama.digdag.client
 
 
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpResponse}
-import org.scalatest._
-import org.scalamock.scalatest.MockFactory
+import org.scalatest.{FlatSpec}
+import org.mockito.Mockito._
+import org.mockito.Matchers.{any,eq => eqTo}
+
 import wvlet.log.LogSupport
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.concurrent.duration._
 
-class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
+class DigdagClientTest  extends FlatSpec with LogSupport {
 
   "projects" should "succeed" in {
     new Fixture {
-      (httpClient.callGetString _).expects("http://localhost:65432/api/projects", *, *).returns(Future {
+      when(httpClient.callGetString(
+        eqTo("http://localhost:65432/api/projects"),
+        any(classOf[Map[String,String]]),
+        any(classOf[Map[String,String]]))
+      ).thenReturn(Future {
         new SimpleHttpResponse[String](
           status = "200 OK",
           contentType = Some("application/json"),
@@ -47,9 +53,8 @@ class DigdagClientTest  extends FlatSpec with Matchers with MockFactory {
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val ec:ExecutionContext = global
     val srvInfo = DigdagServerInfo("http://localhost:65432")
-    val httpClient = mock[SimpleHttpClient]
+    val httpClient = mock(classOf[SimpleHttpClient])
     val client = DigdagClient(httpClient, srvInfo)
-
   }
 }
 

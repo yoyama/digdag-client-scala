@@ -21,6 +21,7 @@ class SimpleHttpClientTest extends AirSpec {
   }
 
   def testCallGetDownload: Unit = {
+    //ToDo collect implementation
     val hc = new SimpleHttpClientScalaJ
     val resp = hc.callGetDownload("http://yahoo.co.jp/", out = Paths.get("/tmp/download1.dat"))
     val ret = Await.result(resp, Duration(30, SECONDS))
@@ -32,6 +33,7 @@ class SimpleHttpClientTest extends AirSpec {
   }
 
   def testCallPutUpload: Unit = {
+    //ToDo collect implementation
     val tempDir = Files.createTempDirectory("testcallPutUpload-")
     val uploadFile = Files.createFile( tempDir.resolve("upload1.dat"))
     val hc = new SimpleHttpClientScalaJ

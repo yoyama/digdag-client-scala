@@ -33,7 +33,7 @@ lazy val client = (project in file("digdag-client"))
       "com.typesafe.play" %% "play-json" % "2.7.4",
       "org.scalactic" %% "scalactic" % "3.0.8",
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
-      "org.scalamock" %% "scalamock" % "4.4.0" % Test
+      "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
     testFrameworks += new TestFramework("wvlet.airspec.Framework")
     //fork in run := true
