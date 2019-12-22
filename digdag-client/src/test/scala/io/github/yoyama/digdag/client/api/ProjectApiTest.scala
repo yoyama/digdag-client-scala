@@ -1,7 +1,5 @@
 package io.github.yoyama.digdag.client.api
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import io.github.yoyama.digdag.client.DigdagServerInfo
 import org.scalatest.{FlatSpec, Matchers}
 

@@ -3,9 +3,6 @@ package io.github.yoyama.digdag.client
 import java.net.URI
 import java.time.Instant
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.http._
@@ -158,16 +155,10 @@ class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:Digd
 
 object DigdagClient {
   def apply(srvInfo:DigdagServerInfo = DigdagServerInfo.local): DigdagClient = {
-    implicit val timeout = 60 seconds
-    implicit val system = ActorSystem()
-    implicit val materializer = ActorMaterializer()
     new DigdagClient()(new SimpleHttpClientScalaJ, srvInfo)
   }
 
   def apply(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo): DigdagClient = {
-    implicit val timeout = srvInfo.apiWait
-    implicit val system = ActorSystem()
-    implicit val materializer = ActorMaterializer()
     new DigdagClient()(httpClient, srvInfo)
   }
 }

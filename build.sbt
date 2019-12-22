@@ -26,8 +26,6 @@ lazy val client = (project in file("digdag-client"))
     name := "client-lib",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "com.typesafe.akka" %% "akka-http"   % "10.1.8",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.23", // or whatever the latest version is
       "org.wvlet.airframe" %% "airframe-json" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-codec" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion,
