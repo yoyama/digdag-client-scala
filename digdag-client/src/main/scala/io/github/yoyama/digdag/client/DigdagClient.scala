@@ -13,14 +13,14 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-case class DigdagServerInfo(endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
+case class ConnectionConfig(name:String, endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
   def apiEndPoint(uriPart:String): String = endPoint.toString + uriPart
 }
 
-object DigdagServerInfo {
-  def apply(uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new DigdagServerInfo(new URI(uri), auth, apiWait)
+object ConnectionConfig {
+  def apply(name:String, uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new ConnectionConfig(name, new URI(uri), auth, apiWait)
 
-  def local = DigdagServerInfo("http://localhost:65432")
+  def local = ConnectionConfig("local", "http://localhost:65432")
 }
 
 case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
@@ -51,7 +51,7 @@ object HttpResult {
   }
 }
 
-class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:DigdagServerInfo) extends ModelUtils {
+class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:ConnectionConfig) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, srvInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
   implicit val sessionApi = new SessionApi(httpClient, srvInfo)
@@ -154,11 +154,11 @@ class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:Digd
 }
 
 object DigdagClient {
-  def apply(srvInfo:DigdagServerInfo = DigdagServerInfo.local): DigdagClient = {
+  def apply(srvInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
     new DigdagClient()(new SimpleHttpClientScalaJ, srvInfo)
   }
 
-  def apply(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo): DigdagClient = {
+  def apply(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig): DigdagClient = {
     new DigdagClient()(httpClient, srvInfo)
   }
 }

@@ -2,14 +2,14 @@ package io.github.yoyama.digdag.client.api
 
 import java.nio.file.Path
 
-import io.github.yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.ConnectionConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper, SimpleHttpClientHelper}
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
-class ProjectApi(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo)(implicit val ec:ExecutionContext){
+class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext){
   def pushProject(name:String, revision:String, path:Path): Future[ProjectRest] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
     val queries = Map("project" -> name, "revision" -> revision)

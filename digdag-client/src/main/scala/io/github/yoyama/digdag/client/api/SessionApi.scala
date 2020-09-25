@@ -1,6 +1,6 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest}
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper}
@@ -8,7 +8,7 @@ import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionApi(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo){
+class SessionApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig){
 
   def getSessions(lastId:Option[Long] = None, pageSize:Option[Long] = None):Future[List[SessionRest]] = {
     val queries =

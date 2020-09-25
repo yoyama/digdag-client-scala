@@ -52,7 +52,7 @@ class DigdagClientTest  extends FlatSpec with LogSupport {
     implicit val timeout = 60 seconds
     import scala.concurrent.ExecutionContext.Implicits.global
     implicit val ec:ExecutionContext = global
-    val srvInfo = DigdagServerInfo("http://localhost:65432")
+    val srvInfo = ConnectionConfig("test", "http://localhost:65432")
     val httpClient = mock(classOf[SimpleHttpClient])
     val client = DigdagClient(httpClient, srvInfo)
   }

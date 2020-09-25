@@ -3,7 +3,7 @@ package io.github.yoyama.digdag.client.api
 import java.time.Instant
 
 import io.github.yoyama.digdag.client.model.{AttemptRest, TaskRest}
-import io.github.yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.ConnectionConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpResponse}
@@ -12,7 +12,7 @@ import play.api.libs.json.{JsObject, Json}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
 import wvlet.log.LogSupport
 
-class AttemptApi(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo)(implicit val ec:ExecutionContext) extends LogSupport {
+class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) extends LogSupport {
   val apiPathPart = "/api/attempts"
   def getAttempts(prjName:String, wfName:String, includeRetried:Boolean = false, lastId:Option[Long] = None,
                   pageSize:Option[Long] = None):Future[List[AttemptRest]] = {
