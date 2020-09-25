@@ -2,6 +2,17 @@ lazy val scala212 = "2.12.10"
 lazy val scala213 = "2.13.1"
 lazy val supportedScalaVersions = List(scala212, scala213)
 
+lazy val commonSettings = Seq(
+  test in assembly := {},
+  assemblyMergeStrategy in assembly := {
+    //case PathList(ps@_*) if ps.last contains "io.netty.versions.properties" => MergeStrategy.first
+    case x if x contains "io.netty.versions.properties" => MergeStrategy.first
+    case x => {
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+    }
+  },
+)
 ThisBuild / scalaVersion     := scala212
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "io.github.yoyama"
@@ -12,16 +23,19 @@ ThisBuild / homepage         := Some(url("https://github.com/yoyama/digdag-clien
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature")
 ThisBuild / cancelable in Global := true
 
+
 lazy val root = (project in file("."))
-  .aggregate(client)
+  .aggregate(client, shell)
+  .settings(commonSettings: _*)
   .settings(
     name := "digdag-client-scala",
-    testFrameworks += new TestFramework("wvlet.airspec.Framework")
-
+    testFrameworks += new TestFramework("wvlet.airspec.Framework"),
+    test in assembly := {}
   )
 
 lazy val airframeVersion = "19.12.3"
-lazy val client = (project in file("digdag-client"))  
+lazy val client = (project in file("digdag-client"))
+  .settings(commonSettings: _*)
   .settings(
     name := "client-lib",
     libraryDependencies ++= Seq(
@@ -40,4 +54,13 @@ lazy val client = (project in file("digdag-client"))
   )
 
 
-//lazy val shell = (project in file("digdag-shell"))
+lazy val shell = (project in file("digdag-shell"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "digdag-shell",
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-compiler" % scala212,
+      "org.scala-lang" % "scala-library" % scala212
+    ),
+    assemblyJarName in assembly := "digdag-shell.jar",
+  )
