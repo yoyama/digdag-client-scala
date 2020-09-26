@@ -1,6 +1,6 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.ConnectionConfig
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.Await
@@ -44,9 +44,9 @@ sealed trait Fixture {
 
   val serverPort = 55432
   val endPointURL = s"http://localhost:${serverPort}/api"
-  val srvInfo = DigdagServerInfo(s"http://localhost:${serverPort}")
+  val connInfo = ConnectionConfig("test", s"http://localhost:${serverPort}")
   val httpClient = new SimpleHttpClientScalaJ()
-  val api =  new ProjectApi(httpClient, srvInfo)
+  val api =  new ProjectApi(httpClient, connInfo)
 
   val router = Router.add[DigdagApi]
 

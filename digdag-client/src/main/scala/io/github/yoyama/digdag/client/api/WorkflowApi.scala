@@ -1,13 +1,13 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.DigdagServerInfo
+import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.model.WorkflowRest
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper}
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WorkflowApi(httpClient: SimpleHttpClient, srvInfo:DigdagServerInfo)(implicit val ec:ExecutionContext){
+class WorkflowApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext){
 
   def getWorkflows(lastId:Option[Long] = None, count:Option[Long] = None):Future[List[WorkflowRest]] = {
     val apiPath = srvInfo.apiEndPoint("/api/workflows")
