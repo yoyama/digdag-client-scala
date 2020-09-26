@@ -14,6 +14,31 @@ import scala.concurrent.duration._
 
 class DigdagClientTest  extends FlatSpec with LogSupport {
 
+  "version" should "succeed" in {
+    new Fixture {
+      when(httpClient.callGetString(
+        eqTo("http://localhost:65432/api/version"),
+        any(classOf[Map[String,String]]),
+        any(classOf[Map[String,String]]))
+      ).thenReturn(Future {
+        new SimpleHttpResponse[String](
+          status = "200 OK",
+          contentType = Some("application/json"),
+          contentLength = None,
+          headers = Map(),
+          body = Some(
+            """{"version":"0.9.42"}
+            """.stripMargin
+          )
+        )
+      })
+
+      val version = client.version()
+      println(version)
+      assert(version.get == "0.9.42")
+    }
+  }
+
   "projects" should "succeed" in {
     new Fixture {
       when(httpClient.callGetString(

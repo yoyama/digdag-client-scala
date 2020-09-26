@@ -1,10 +1,11 @@
 package io.github.yoyama.digdag.client
 
 import java.net.URI
+import java.nio.file.Path
 import java.time.Instant
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.http._
 import io.github.yoyama.digdag.client.model._
 
@@ -21,6 +22,18 @@ object ConnectionConfig {
   def apply(name:String, uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new ConnectionConfig(name, new URI(uri), auth, apiWait)
 
   def local = ConnectionConfig("local", "http://localhost:65432")
+
+  def load(path:Path): Try[ConnectionConfig] = {
+    ???
+  }
+
+  def loadAll(dir:Path): Map[String, Try[ConnectionConfig]] = {
+    ???
+  }
+
+  def loadAll(): Map[String, Try[ConnectionConfig]] = {
+    ???
+  }
 }
 
 case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
@@ -51,19 +64,20 @@ object HttpResult {
   }
 }
 
-class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:ConnectionConfig) extends ModelUtils {
-  implicit val projectApi = new ProjectApi(httpClient, srvInfo)
-  implicit val workflowApi = new WorkflowApi(httpClient, srvInfo)
-  implicit val sessionApi = new SessionApi(httpClient, srvInfo)
-  implicit val attemptApi = new AttemptApi(httpClient, srvInfo)
+class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfig) extends ModelUtils {
+  implicit val projectApi = new ProjectApi(httpClient, connInfo)
+  implicit val workflowApi = new WorkflowApi(httpClient, connInfo)
+  implicit val sessionApi = new SessionApi(httpClient, connInfo)
+  implicit val attemptApi = new AttemptApi(httpClient, connInfo)
+  implicit val versionApi = new VersionApi(httpClient, connInfo)
 
-  val apiWait = srvInfo.apiWait
+  val apiWait = connInfo.apiWait
 
   def syncOpt[T](x:Future[T]): Option[T] = {
     val f = x.map(Option(_)).recover {
       case _ => None
     }
-    Await.result(f, srvInfo.apiWait)
+    Await.result(f, connInfo.apiWait)
   }
 
   def syncTry[T](x:Future[T]): Try[T] = {
@@ -71,7 +85,7 @@ class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:Conn
       case e:Throwable => Failure(e)
       case x => Failure(new Throwable(x))
     }
-    Await.result(f, srvInfo.apiWait)
+    Await.result(f, connInfo.apiWait)
   }
 
   def projects(): Seq[ProjectRest] = syncOpt(projectApi.getProjects()).getOrElse(Seq.empty)
@@ -133,7 +147,7 @@ class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:Conn
       wf <- projectApi.getWorkflow(Integer.parseInt(prj.id), wfName)
       apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), getSession)
     } yield apiResult
-    HttpResult(ret, srvInfo.apiWait)
+    HttpResult(ret, connInfo.apiWait)
   }
 
   //def schedules
@@ -151,14 +165,16 @@ class DigdagClient()(implicit val httpClient:SimpleHttpClient,  val srvInfo:Conn
   //def logFiles(projId)
   //def logDownload(projId)
 
+  def version():Try[String] = syncTry(versionApi.getVersion()).map(_.version)
+
 }
 
 object DigdagClient {
-  def apply(srvInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
-    new DigdagClient()(new SimpleHttpClientScalaJ, srvInfo)
+  def apply(connInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
+    new DigdagClient(new SimpleHttpClientScalaJ)( connInfo)
   }
 
   def apply(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig): DigdagClient = {
-    new DigdagClient()(httpClient, srvInfo)
+    new DigdagClient(httpClient)(srvInfo)
   }
 }
