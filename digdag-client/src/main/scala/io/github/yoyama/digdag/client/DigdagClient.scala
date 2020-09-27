@@ -165,7 +165,7 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
   //def logFiles(projId)
   //def logDownload(projId)
 
-  def version():Try[String] = syncTry(versionApi.getVersion()).map(_.version)
+  def version:Try[String] = syncTry(versionApi.getVersion()).map(_.version)
 
 }
 

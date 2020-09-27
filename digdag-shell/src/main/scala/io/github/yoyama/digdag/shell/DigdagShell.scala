@@ -12,7 +12,6 @@ object DigdagShell extends App {
   settings.usejavacp.value = true
   settings.deprecation.value = true
   val shellConfig = ShellConfig(settings)
-  Prop[String]("scala.repl.prompt").set("aaaaa")
   new DigdagILoop(shellConfig).run(settings)
 }
 
@@ -22,10 +21,10 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
   //override def prompt: String = conn.map(_.name).getOrElse("(no connect)") + "=> "
   //override lazy val prompt = "AAAAA>"
 
+  intp.beQuietDuring()
   import LoopCommand.cmd
 
   lazy val digdagCommands = Seq(
-    cmd("version", "", "show digdag version", digdagVersion),
     cmd("connect", "", "connect to a digdag version", digdagConnect)
   )
   override def commands: List[LoopCommand] = super.commands ++ digdagCommands
@@ -61,13 +60,9 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
     Result(true, Some(ret))
   }
 
-  private def digdagVersion(line0: String): Result = {
-    "0.9.38"
-  }
-
   override def printWelcome(): Unit = {
     echo("\n" +
-      "Digdag Shell" +
+      "### Digdag Shell ###" +
       "\n")
   }
 }
