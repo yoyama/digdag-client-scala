@@ -14,28 +14,6 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-case class ConnectionConfig(name:String, endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
-  def apiEndPoint(uriPart:String): String = endPoint.toString + uriPart
-}
-
-object ConnectionConfig {
-  def apply(name:String, uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new ConnectionConfig(name, new URI(uri), auth, apiWait)
-
-  def local = ConnectionConfig("local", "http://localhost:65432")
-
-  def load(path:Path): Try[ConnectionConfig] = {
-    ???
-  }
-
-  def loadAll(dir:Path): Map[String, Try[ConnectionConfig]] = {
-    ???
-  }
-
-  def loadAll(): Map[String, Try[ConnectionConfig]] = {
-    ???
-  }
-}
-
 case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
 
 sealed abstract class ResultStatus(val code:Int)
@@ -171,10 +149,10 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
 
 object DigdagClient {
   def apply(connInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
-    new DigdagClient(new SimpleHttpClientScalaJ)( connInfo)
+    new DigdagClient(new SimpleHttpClientScalaJ)(connInfo)
   }
 
-  def apply(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig): DigdagClient = {
-    new DigdagClient(httpClient)(srvInfo)
+  def apply(httpClient: SimpleHttpClient, connInfo:ConnectionConfig): DigdagClient = {
+    new DigdagClient(httpClient)(connInfo)
   }
 }

@@ -21,7 +21,6 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
   //override def prompt: String = conn.map(_.name).getOrElse("(no connect)") + "=> "
   //override lazy val prompt = "AAAAA>"
 
-  intp.beQuietDuring()
   import LoopCommand.cmd
 
   lazy val digdagCommands = Seq(
