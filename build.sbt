@@ -1,5 +1,5 @@
 lazy val scala212 = "2.12.10"
-lazy val scala213 = "2.13.1"
+lazy val scala213 = "2.13.3"
 lazy val supportedScalaVersions = List(scala212, scala213)
 
 lazy val commonSettings = Seq(
@@ -13,7 +13,7 @@ lazy val commonSettings = Seq(
     }
   },
 )
-ThisBuild / scalaVersion     := scala212
+ThisBuild / scalaVersion     := scala213
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "io.github.yoyama"
 ThisBuild / organizationName := "yoyama"
@@ -33,7 +33,7 @@ lazy val root = (project in file("."))
     test in assembly := {}
   )
 
-lazy val airframeVersion = "19.12.3"
+lazy val airframeVersion = "20.9.2"
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
@@ -59,8 +59,9 @@ lazy val shell = (project in file("digdag-shell"))
   .settings(
     name := "digdag-shell",
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-compiler" % scala212,
-      "org.scala-lang" % "scala-library" % scala212
+      "org.scala-lang" % "scala-compiler" % scala213,
+      "org.scala-lang" % "scala-library" % scala213
     ),
     assemblyJarName in assembly := "digdag-shell.jar",
   )
+  .dependsOn(client)

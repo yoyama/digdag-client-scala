@@ -68,7 +68,8 @@ class DigdagClientTest  extends FlatSpec with LogSupport {
       })
 
       val prj = client.projects()
-      assert(prj.head.name == "test-proj1")
+      assert(prj.isSuccess)
+      assert(prj.get.head.name == "test-proj1")
       println(prj)
     }
   }

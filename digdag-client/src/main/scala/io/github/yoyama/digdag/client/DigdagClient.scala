@@ -88,53 +88,53 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
     Await.result(f, connInfo.apiWait)
   }
 
-  def projects(): Seq[ProjectRest] = syncOpt(projectApi.getProjects()).getOrElse(Seq.empty)
+  def projects(): Try[Seq[ProjectRest]] = syncTry(projectApi.getProjects())
 
-  def project(name:String): Option[ProjectRest] = syncOpt(projectApi.getProject(name))
+  def project(name:String): Try[ProjectRest] = syncTry(projectApi.getProject(name))
 
-  def project(id:Long): Option[ProjectRest] = syncOpt(projectApi.getProject(id))
+  def project(id:Long): Try[ProjectRest] = syncTry(projectApi.getProject(id))
 
-  def workflows(prjId: Long): Option[Seq[WorkflowRest]] = syncOpt(projectApi.getWorkflows(prjId))
+  def workflows(prjId: Long): Try[Seq[WorkflowRest]] = syncTry(projectApi.getWorkflows(prjId))
 
-  def workflows(prjName: String): Option[Seq[WorkflowRest]] = {
+  def workflows(prjName: String): Try[Seq[WorkflowRest]] = {
     for {
       prj <- project(prjName)
       wf  <- workflows(prj.id.toLong)
     } yield wf
   }
 
-  def workflows(prj: ProjectRest): Option[Seq[WorkflowRest]] = workflows(prj.id.toLong)
+  def workflows(prj: ProjectRest): Try[Seq[WorkflowRest]] = workflows(prj.id.toLong)
 
-  def workflow(id:Long): Option[WorkflowRest] = syncOpt(workflowApi.getWorkflow(id))
+  def workflow(id:Long): Try[WorkflowRest] = syncTry(workflowApi.getWorkflow(id))
 
-  def workflow(prjName:String, name:String): Option[WorkflowRest] = {
+  def workflow(prjName:String, name:String): Try[WorkflowRest] = {
     for {
       prj <- project(prjName)
       wf  <- workflow(prj.id, name)
     } yield wf
   }
 
-  def workflow(prjId:Long, name:String): Option[WorkflowRest] = syncOpt(projectApi.getWorkflow(prjId, name))
+  def workflow(prjId:Long, name:String): Try[WorkflowRest] = syncTry(projectApi.getWorkflow(prjId, name))
 
-  def workflow(prj:ProjectRest, name:String): Option[WorkflowRest] = workflow(prj.id, name)
+  def workflow(prj:ProjectRest, name:String): Try[WorkflowRest] = workflow(prj.id, name)
 
-  def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Option[Seq[SessionRest]] = syncOpt(sessionApi.getSessions(lastId, pageSize))
+  def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Try[Seq[SessionRest]] = syncTry(sessionApi.getSessions(lastId, pageSize))
 
-  def sessions(prjName:String, wfName:String): Option[Seq[SessionRest]] = ??? //syncOpt(sessionApi.getSessions())
+  def sessions(prjName:String, wfName:String): Try[Seq[SessionRest]] = ??? //syncOpt(sessionApi.getSessions())
 
-  def session(id:Long): Option[SessionRest] = syncOpt(sessionApi.getSession(id))
+  def session(id:Long): Try[SessionRest] = syncTry(sessionApi.getSession(id))
 
-  def attempts(sessionId:Long): Option[Seq[AttemptRest]] = syncOpt(sessionApi.getAttempts(sessionId))
+  def attempts(sessionId:Long): Try[Seq[AttemptRest]] = syncTry(sessionApi.getAttempts(sessionId))
 
   def attempts(prjName:String, wfName:String, includeRetried:Boolean = false,
-               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Option[Seq[AttemptRest]]
-                            = syncOpt(attemptApi.getAttempts(prjName, wfName))
+               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Try[Seq[AttemptRest]]
+                            = syncTry(attemptApi.getAttempts(prjName, wfName))
 
-  def attempt(id:Long): Option[AttemptRest] = syncOpt(attemptApi.getAttempt(id))
+  def attempt(id:Long): Try[AttemptRest] = syncTry(attemptApi.getAttempt(id))
 
-  def retries(attemptId:Long): Option[List[AttemptRest]] = syncOpt(attemptApi.getAttemptRetries(attemptId))
+  def retries(attemptId:Long): Try[List[AttemptRest]] = syncTry(attemptApi.getAttemptRetries(attemptId))
 
-  def tasks(attemptId:Long): Option[List[TaskRest]] = syncOpt(attemptApi.getTasks(attemptId))
+  def tasks(attemptId:Long): Try[List[TaskRest]] = syncTry(attemptApi.getTasks(attemptId))
 
   def doKill(attemptId:Long) = ???
 
