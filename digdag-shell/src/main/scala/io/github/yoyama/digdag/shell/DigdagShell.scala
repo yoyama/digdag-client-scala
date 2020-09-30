@@ -49,9 +49,10 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
       case "default" :: xs => {
         echoCommandMessage("default is set")
         intp.interpret("import io.github.yoyama.digdag.client.{ConnectionConfig,DigdagClient}")
+        intp.interpret("import io.github.yoyama.digdag.shell.{DigdagClientEx}")
         intp.interpret("""implicit val connectionConfig = ConnectionConfig("default", "http://localhost:65432") """)
-        intp.interpret("""val dc = DigdagClient()""")
-        intp.settings.prompt.tryToSet(List("aaaa"))
+        intp.interpret("""val dc = DigdagClient(connectionConfig)""")
+        intp.interpret("""val dcx = DigdagClientEx(connectionConfig)""")
         ""
       }
       case _ => "Not yet implemented"

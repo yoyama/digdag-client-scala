@@ -1,3 +1,5 @@
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 lazy val scala212 = "2.12.10"
 lazy val scala213 = "2.13.3"
 lazy val supportedScalaVersions = List(scala212, scala213)
@@ -40,12 +42,13 @@ lazy val client = (project in file("digdag-client"))
     name := "client-lib",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "org.wvlet.airframe" %% "airframe-json" % airframeVersion,
-      "org.wvlet.airframe" %% "airframe-codec" % airframeVersion,
-      "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion,
-      "org.wvlet.airframe" %% "airspec" % airframeVersion % "test",
       "com.typesafe.play" %% "play-json" % "2.7.4",
-      "org.scalactic" %% "scalactic" % "3.0.8",
+      "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
+      "org.wvlet.airframe" %% "airframe-json" % airframeVersion % Test,
+      "org.wvlet.airframe" %% "airframe-codec" % airframeVersion % Test,
+      "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
+      "org.wvlet.airframe" %% "airspec" % airframeVersion % Test,
+      "org.scalactic" %% "scalactic" % "3.0.8" % Test,
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
@@ -60,7 +63,11 @@ lazy val shell = (project in file("digdag-shell"))
     name := "digdag-shell",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-compiler" % scala213,
-      "org.scala-lang" % "scala-library" % scala213
+      "org.scala-lang" % "scala-library" % scala213,
+      "org.scala-lang" % "scala-reflect" % scala213,
+      "org.scalactic" %% "scalactic" % "3.0.8" % Test,
+      "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+      "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
     assemblyJarName in assembly := "digdag-shell.jar",
   )

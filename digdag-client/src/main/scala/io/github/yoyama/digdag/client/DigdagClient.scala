@@ -42,7 +42,7 @@ object HttpResult {
   }
 }
 
-class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfig) extends ModelUtils {
+class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfig) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, connInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, connInfo)
   implicit val sessionApi = new SessionApi(httpClient, connInfo)
@@ -149,10 +149,10 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
 
 object DigdagClient {
   def apply(connInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
-    new DigdagClient(new SimpleHttpClientScalaJ)(connInfo)
+    new DigdagClient(new SimpleHttpClientScalaJ, connInfo)
   }
 
   def apply(httpClient: SimpleHttpClient, connInfo:ConnectionConfig): DigdagClient = {
-    new DigdagClient(httpClient)(connInfo)
+    new DigdagClient(httpClient, connInfo)
   }
 }
