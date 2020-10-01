@@ -104,9 +104,9 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def attempts(sessionId:Long): Try[Seq[AttemptRest]] = syncTry(sessionApi.getAttempts(sessionId))
 
-  def attempts(prjName:String, wfName:String, includeRetried:Boolean = false,
+  def attempts(prjName:Option[String] = None, wfName:Option[String] = None, includeRetried:Boolean = false,
                lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Try[Seq[AttemptRest]]
-                            = syncTry(attemptApi.getAttempts(prjName, wfName))
+                            = syncTry(attemptApi.getAttempts(prjName, wfName, includeRetried, lastId, pageSize))
 
   def attempt(id:Long): Try[AttemptRest] = syncTry(attemptApi.getAttempt(id))
 

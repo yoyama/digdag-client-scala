@@ -2,8 +2,7 @@ package io.github.yoyama.digdag.shell
 
 import io.github.yoyama.digdag.client.{ConnectionConfig, DigdagClient}
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpClientScalaJ}
-import io.github.yoyama.digdag.client.model.ProjectRest
-import io.github.yoyama.digdag.shell
+import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest}
 
 import scala.math.max
 import scala.reflect.{ClassTag, classTag}
@@ -19,6 +18,8 @@ class DigdagClientEx(client:DigdagClient) extends TablePrint {
   }
 
   def projects: Try[Seq[ProjectRest]] = printTableTry(client.projects(), vertical = vertical)
+  def sessions: Try[Seq[SessionRest]] = printTableTry(client.sessions(), vertical = vertical)
+  def attempts: Try[Seq[AttemptRest]] = printTableTry(client.attempts(), vertical = vertical)
 }
 
 object  DigdagClientEx{
@@ -95,12 +96,14 @@ trait TablePrint {
   }
 
   def printTableVertical(headers:Seq[String], tbl:Seq[Seq[String]], width:Int):Unit = {
-    val headerWidth = headers.max(Ordering.by[String, Int](x => x.length)).length
+    val ord = Ordering.by[String, Int](x => x.length)
+    val headerWidth = headers.max(ord).length
+    val valueWidth = tbl.flatMap(x => x).max(ord).length
     tbl.foreach { r =>
       r.zip(headers).foreach { c =>
         printf(s" %${headerWidth}s| %s\n", c._2, c._1)
       }
-      println()
+      println(hline(headerWidth + valueWidth + 3))
     }
   }
 }
