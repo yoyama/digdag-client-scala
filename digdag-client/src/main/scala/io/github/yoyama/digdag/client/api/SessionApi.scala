@@ -20,7 +20,7 @@ class SessionApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig){
     for {
       r1 <- httpClient.callGetString(apiPath, queries)
       body <- r1.body.toFuture("no body")
-      r3 <- SessionRest.toSessions(body).toFuture
+      r3 <- SessionRest.toSessions(body).toFuture()
     } yield r3
   }
 
@@ -29,7 +29,7 @@ class SessionApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig){
     for {
       r1 <- httpClient.callGetString(apiPath)
       body <- r1.body.toFuture("no body")
-      r3 <- SessionRest.toSession(body).toFuture
+      r3 <- SessionRest.toSession(body).toFuture()
     } yield r3
   }
 
@@ -38,7 +38,7 @@ class SessionApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig){
     for {
       r1 <- httpClient.callGetString(apiPath)
       body <- r1.body.toFuture("no body")
-      r3 <- AttemptRest.toAttempts(body).toFuture
+      r3 <- AttemptRest.toAttempts(body).toFuture()
     } yield r3
   }
 }

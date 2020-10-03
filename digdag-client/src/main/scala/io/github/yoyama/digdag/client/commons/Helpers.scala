@@ -2,7 +2,6 @@ package io.github.yoyama.digdag.client.commons
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient}
-import wvlet.airframe.http.HttpResponse
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -36,15 +35,6 @@ object Helpers {
         r1 <- cl.callGetString(apiPath, queries)
         r2 <- Future.fromTry(funcToRest(r1.body.get))
       } yield r2
-    }
-  }
-
-  implicit class HttpResponseHelper[RESP](resp:HttpResponse[RESP]) {
-
-    def toRest[T](funcToRest:String=>Try[T]):Future[T] = {
-      for {
-        r1 <- Future.fromTry(funcToRest(resp.contentString))
-      } yield r1
     }
   }
 

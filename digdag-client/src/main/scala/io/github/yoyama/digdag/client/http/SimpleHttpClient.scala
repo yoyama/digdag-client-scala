@@ -27,10 +27,10 @@ trait SimpleHttpClient {
   type RespConverter[A,U] = (A,Option[String],Option[Long])=> U  // (data,content type, size) => converted.
 
   implicit val stringConverter = (body:Array[Byte], ctype:Option[String], csize:Option[Long]) => {
-    new String(body, ctype.map(contenTypeToCharset(_)).getOrElse(StandardCharsets.UTF_8))
+    new String(body, ctype.map(contentTypeToCharset(_)).getOrElse(StandardCharsets.UTF_8))
   }
 
-  def contenTypeToCharset(ctype:String, defaultCharset:Charset = StandardCharsets.UTF_8):Charset = {
+  def contentTypeToCharset(ctype:String, defaultCharset:Charset = StandardCharsets.UTF_8):Charset = {
     //ToDo implement parse contentType
     StandardCharsets.UTF_8
   }
