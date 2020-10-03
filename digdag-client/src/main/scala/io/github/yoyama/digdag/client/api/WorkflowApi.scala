@@ -18,7 +18,7 @@ class WorkflowApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implic
     for {
       resp <- httpClient.callGetString(apiPath)
       body <- resp.body.toFuture("No body data")
-      rest <- WorkflowRest.toWorkflows(body).toFuture
+      rest <- WorkflowRest.toWorkflows(body).toFuture()
     } yield rest
   }
 
@@ -27,7 +27,7 @@ class WorkflowApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implic
     for {
       resp <- httpClient.callGetString(apiPath)
       body <- resp.body.toFuture("No body data")
-      rest <- WorkflowRest.toWorkflow(body).toFuture
+      rest <- WorkflowRest.toWorkflow(body).toFuture()
     } yield rest
   }
 }

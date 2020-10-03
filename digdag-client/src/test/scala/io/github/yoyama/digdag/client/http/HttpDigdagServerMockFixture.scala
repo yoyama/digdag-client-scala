@@ -3,7 +3,7 @@ package io.github.yoyama.digdag.client.http
 import com.twitter.finagle.http.Response
 import wvlet.airframe.http.Router
 
-trait DigdagServerMockFixture {
+private[http] trait HttpDigdagServerMockFixture {
   import wvlet.airframe.http.{Endpoint, HttpMethod}
   import wvlet.airframe.http.finagle._
 
@@ -118,6 +118,5 @@ trait DigdagServerMockFixture {
       response.contentType = "application/json;charset=utf-8"
       response
     }
-
   }
 }

@@ -1,20 +1,42 @@
 package io.github.yoyama.digdag.client.api
 
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
+import java.time.LocalDateTime
 
 import io.github.yoyama.digdag.client.ConnectionConfig
+import io.github.yoyama.digdag.client.commons.ArchiveUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
-import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper, SimpleHttpClientHelper}
+import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
-class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext){
-  def pushProject(name:String, revision:String, path:Path): Future[ProjectRest] = {
+import scala.util.Random
+import scala.util.control.Exception.catching
+
+class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) {
+  val archiveUtils = new ArchiveUtils {}
+
+  def pushProjectDir(name:String, revision:String, dir:Path, tempDir:Path = archiveUtils.sysTempDir): Future[ProjectRest] = {
+    for {
+      archivePath <- catching(classOf[Throwable])
+        .withTry(tempDir.resolve(s"digdag_prject_${System.currentTimeMillis}_${Random.nextLong()}.tar.gz"))
+        .toFuture()
+      archiveFile <- Future {
+        val f = archivePath.toFile
+        f.deleteOnExit()
+        f
+      }
+      tar <- archiveUtils.archiveProject(archiveFile.toPath, dir)
+      rest <- pushProject(name, revision, tar.toPath)
+    } yield rest
+  }
+
+  def pushProject(name:String, revision:String, archive:Path): Future[ProjectRest] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
     val queries = Map("project" -> name, "revision" -> revision)
     for {
-      resp <- httpClient.callPutUpload(apiPath, "application/gzip", path, queries)
+      resp <- httpClient.callPutUpload(apiPath, "application/gzip", archive, queries)
       body <- resp.body.toFuture("No body data")
       rest <- ProjectRest.toProject(body).toFuture()
     } yield rest

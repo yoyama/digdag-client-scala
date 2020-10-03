@@ -33,7 +33,7 @@ class DigdagClientTest  extends FlatSpec with LogSupport {
         )
       })
 
-      val version = client.version()
+      val version = client.version
       println(version)
       assert(version.get == "0.9.42")
     }
@@ -68,7 +68,8 @@ class DigdagClientTest  extends FlatSpec with LogSupport {
       })
 
       val prj = client.projects()
-      assert(prj.head.name == "test-proj1")
+      assert(prj.isSuccess)
+      assert(prj.get.head.name == "test-proj1")
       println(prj)
     }
   }

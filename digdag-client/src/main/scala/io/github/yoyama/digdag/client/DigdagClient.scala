@@ -1,11 +1,12 @@
 package io.github.yoyama.digdag.client
 
-import java.net.URI
 import java.nio.file.Path
 import java.time.Instant
+import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.commons.Helpers.TryHelper
 import io.github.yoyama.digdag.client.http._
 import io.github.yoyama.digdag.client.model._
 
@@ -13,28 +14,6 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
-
-case class ConnectionConfig(name:String, endPoint:URI, auth:Option[Int], apiWait:FiniteDuration) {
-  def apiEndPoint(uriPart:String): String = endPoint.toString + uriPart
-}
-
-object ConnectionConfig {
-  def apply(name:String, uri:String, auth:Option[Int] = None, apiWait:FiniteDuration = 30 second) = new ConnectionConfig(name, new URI(uri), auth, apiWait)
-
-  def local = ConnectionConfig("local", "http://localhost:65432")
-
-  def load(path:Path): Try[ConnectionConfig] = {
-    ???
-  }
-
-  def loadAll(dir:Path): Map[String, Try[ConnectionConfig]] = {
-    ???
-  }
-
-  def loadAll(): Map[String, Try[ConnectionConfig]] = {
-    ???
-  }
-}
 
 case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
 
@@ -64,7 +43,7 @@ object HttpResult {
   }
 }
 
-class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfig) extends ModelUtils {
+class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfig) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, connInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, connInfo)
   implicit val sessionApi = new SessionApi(httpClient, connInfo)
@@ -88,66 +67,72 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
     Await.result(f, connInfo.apiWait)
   }
 
-  def projects(): Seq[ProjectRest] = syncOpt(projectApi.getProjects()).getOrElse(Seq.empty)
+  def projects(): Try[Seq[ProjectRest]] = syncTry(projectApi.getProjects())
 
-  def project(name:String): Option[ProjectRest] = syncOpt(projectApi.getProject(name))
+  def project(name:String): Try[ProjectRest] = syncTry(projectApi.getProject(name))
 
-  def project(id:Long): Option[ProjectRest] = syncOpt(projectApi.getProject(id))
+  def project(id:Long): Try[ProjectRest] = syncTry(projectApi.getProject(id))
 
-  def workflows(prjId: Long): Option[Seq[WorkflowRest]] = syncOpt(projectApi.getWorkflows(prjId))
+  def workflows(prjId: Long): Try[Seq[WorkflowRest]] = syncTry(projectApi.getWorkflows(prjId))
 
-  def workflows(prjName: String): Option[Seq[WorkflowRest]] = {
+  def workflows(prjName: String): Try[Seq[WorkflowRest]] = {
     for {
       prj <- project(prjName)
       wf  <- workflows(prj.id.toLong)
     } yield wf
   }
 
-  def workflows(prj: ProjectRest): Option[Seq[WorkflowRest]] = workflows(prj.id.toLong)
+  def workflows(prj: ProjectRest): Try[Seq[WorkflowRest]] = workflows(prj.id.toLong)
 
-  def workflow(id:Long): Option[WorkflowRest] = syncOpt(workflowApi.getWorkflow(id))
+  def workflow(id:Long): Try[WorkflowRest] = syncTry(workflowApi.getWorkflow(id))
 
-  def workflow(prjName:String, name:String): Option[WorkflowRest] = {
+  def workflow(prjName:String, name:String): Try[WorkflowRest] = {
     for {
       prj <- project(prjName)
       wf  <- workflow(prj.id, name)
     } yield wf
   }
 
-  def workflow(prjId:Long, name:String): Option[WorkflowRest] = syncOpt(projectApi.getWorkflow(prjId, name))
+  def workflow(prjId:Long, name:String): Try[WorkflowRest] = syncTry(projectApi.getWorkflow(prjId, name))
 
-  def workflow(prj:ProjectRest, name:String): Option[WorkflowRest] = workflow(prj.id, name)
+  def workflow(prj:ProjectRest, name:String): Try[WorkflowRest] = workflow(prj.id, name)
 
-  def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Option[Seq[SessionRest]] = syncOpt(sessionApi.getSessions(lastId, pageSize))
+  def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Try[Seq[SessionRest]] = syncTry(sessionApi.getSessions(lastId, pageSize))
 
-  def sessions(prjName:String, wfName:String): Option[Seq[SessionRest]] = ??? //syncOpt(sessionApi.getSessions())
+  def sessions(prjName:String, wfName:String): Try[Seq[SessionRest]] = ??? //syncOpt(sessionApi.getSessions())
 
-  def session(id:Long): Option[SessionRest] = syncOpt(sessionApi.getSession(id))
+  def session(id:Long): Try[SessionRest] = syncTry(sessionApi.getSession(id))
 
-  def attempts(sessionId:Long): Option[Seq[AttemptRest]] = syncOpt(sessionApi.getAttempts(sessionId))
+  def attempts(sessionId:Long): Try[Seq[AttemptRest]] = syncTry(sessionApi.getAttempts(sessionId))
 
-  def attempts(prjName:String, wfName:String, includeRetried:Boolean = false,
-               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Option[Seq[AttemptRest]]
-                            = syncOpt(attemptApi.getAttempts(prjName, wfName))
+  def attempts(prjName:Option[String] = None, wfName:Option[String] = None, includeRetried:Boolean = false,
+               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Try[Seq[AttemptRest]]
+                            = syncTry(attemptApi.getAttempts(prjName, wfName, includeRetried, lastId, pageSize))
 
-  def attempt(id:Long): Option[AttemptRest] = syncOpt(attemptApi.getAttempt(id))
+  def attempt(id:Long): Try[AttemptRest] = syncTry(attemptApi.getAttempt(id))
 
-  def retries(attemptId:Long): Option[List[AttemptRest]] = syncOpt(attemptApi.getAttemptRetries(attemptId))
+  def retries(attemptId:Long): Try[List[AttemptRest]] = syncTry(attemptApi.getAttemptRetries(attemptId))
 
-  def tasks(attemptId:Long): Option[List[TaskRest]] = syncOpt(attemptApi.getTasks(attemptId))
+  def tasks(attemptId:Long): Try[List[TaskRest]] = syncTry(attemptApi.getTasks(attemptId))
 
   def doKill(attemptId:Long) = ???
 
-  //def doPush
+  def doPush(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest] = {
+    syncTry(projectApi.pushProjectDir(prjName, revision.getOrElse(UUID.randomUUID.toString), prjDir))
+  }
 
-  def doStart(prjName:String, wfName:String, session:Option[String] = None): HttpResult[AttemptRest] = {
-    def getSession = session.map(toInstant(_)).getOrElse(Instant.now())
+  def doStart(prjName:String, wfName:String, session:Option[String] = None): Try[AttemptRest] = {
+    def getSession: Try[Instant] = session match {
+      case None => Success(Instant.now())
+      case Some(s) => toInstant(s)
+    }
     val ret = for {
+      ss <- getSession.toFuture()
       prj <- projectApi.getProject(prjName)
       wf <- projectApi.getWorkflow(Integer.parseInt(prj.id), wfName)
-      apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), getSession)
-    } yield apiResult
-    HttpResult(ret, connInfo.apiWait)
+      apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), ss)
+    } yield apiResult._1
+    syncTry(ret)
   }
 
   //def schedules
@@ -165,16 +150,16 @@ class DigdagClient(val httpClient:SimpleHttpClient)(val connInfo:ConnectionConfi
   //def logFiles(projId)
   //def logDownload(projId)
 
-  def version():Try[String] = syncTry(versionApi.getVersion()).map(_.version)
+  def version:Try[String] = syncTry(versionApi.getVersion()).map(_.version)
 
 }
 
 object DigdagClient {
   def apply(connInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
-    new DigdagClient(new SimpleHttpClientScalaJ)( connInfo)
+    new DigdagClient(new SimpleHttpClientScalaJ, connInfo)
   }
 
-  def apply(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig): DigdagClient = {
-    new DigdagClient(httpClient)(srvInfo)
+  def apply(httpClient: SimpleHttpClient, connInfo:ConnectionConfig): DigdagClient = {
+    new DigdagClient(httpClient, connInfo)
   }
 }
