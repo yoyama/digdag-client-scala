@@ -11,7 +11,7 @@ import scala.language.postfixOps
 
 class ProjectApiTest extends FlatSpec with Matchers {
 
-  def testListProject(): Unit = {
+  "getProjects" should "works" in {
     new ApiDigdagServerMockFixture {
       finagleDesign.build[FinagleServer] { server =>
         Await.result(api.getProjects(), 60 seconds) match {
