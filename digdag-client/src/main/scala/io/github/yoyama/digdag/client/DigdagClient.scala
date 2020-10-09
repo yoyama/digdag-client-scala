@@ -1,8 +1,8 @@
 package io.github.yoyama.digdag.client
 
-import java.net.URI
 import java.nio.file.Path
 import java.time.Instant
+import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
@@ -117,7 +117,9 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def doKill(attemptId:Long) = ???
 
-  //def doPush
+  def doPush(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest] = {
+    syncTry(projectApi.pushProjectDir(prjName, revision.getOrElse(UUID.randomUUID.toString), prjDir))
+  }
 
   def doStart(prjName:String, wfName:String, session:Option[String] = None): Try[AttemptRest] = {
     def getSession: Try[Instant] = session match {
