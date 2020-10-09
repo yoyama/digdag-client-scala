@@ -4,11 +4,8 @@ import java.io.{File, FileOutputStream}
 import java.nio.file.{Files, Path, Paths}
 import io.github.yoyama.digdag.client.commons.Helpers.TryHelper
 
-import org.apache.commons.compress.archivers.ArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,14 +15,15 @@ import scala.util.matching.Regex
 
 trait ArchiveUtils {
 
-  def archiveProject(srcPath:Path, dstPath:Path, excludes:Seq[Regex] = Seq.empty): Future[File] = {
+  def archiveProject(dstPath:Path, srcPath:Path, excludes:Seq[Regex] = Seq.empty): Future[File] = {
     for {
       srcFiles <- validateSrc(srcPath)
       dst <- validateDst(dstPath).map(_.toPath)
-      tar <- createTar(Files.createTempFile(dstPath.getParent(), "project_", ".tar"), srcPath, srcFiles)
-      gzip <- createGzip(dst, tar)
-    } yield gzip.toFile
+      tar <- createTar(dst, srcPath, srcFiles)
+    } yield tar.toFile
   }
+
+  def sysTempDir:Path =  Paths.get(System.getProperty("java.io.tmpdir"))
 
   private def validateSrc(srcPath:Path):Future[Seq[File]] = {
     Future {
@@ -38,7 +36,7 @@ trait ArchiveUtils {
 
   private[commons] def validateDst(dstPath:Path):Future[File] = Future {
     dstPath.toFile match {
-      case d if d.exists() => throw new RuntimeException("The file exists")
+      case d if d.exists() => throw new RuntimeException(s"The file exists: ${d.toString()}")
       case d if d.createNewFile() => d
     }
   }
@@ -53,7 +51,7 @@ trait ArchiveUtils {
 
   private[commons] def createTar(tar:Path, srcPath:Path, files:Seq[File]): Future[Path] = Future {
     val t = Using.Manager { use =>
-      val out = use(new FileOutputStream(tar.toFile().getPath()))
+      val out = use(new GzipCompressorOutputStream(new FileOutputStream(tar.toFile().getPath())))
       val outTar = use (new TarArchiveOutputStream(out))
       val prefixDir = srcPath.toFile().getAbsolutePath().replaceAll("\\\\", "/")
 
@@ -71,8 +69,4 @@ trait ArchiveUtils {
     }
     t.toFuture()
   }.flatMap(x => x)
-
-  private[commons] def createGzip(dst:Path, src:Path): Future[Path] = Future {
-    dst
-  }
 }

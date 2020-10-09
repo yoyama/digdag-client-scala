@@ -1,19 +1,22 @@
 package io.github.yoyama.digdag.client.api
 
 import java.io.{ByteArrayInputStream, IOException}
+import java.nio.file.{Files, Paths}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.twitter.finagle.http.{Response, Status}
 import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.http.SimpleHttpClientScalaJ
 import wvlet.airframe.Design
-import wvlet.airframe.http.{HttpRequest, Router}
+import wvlet.airframe.http.{HttpMessage, HttpRequest, Router}
 import java.util.zip.GZIPInputStream
+
+import io.github.yoyama.digdag.client.commons.IOUtils
 
 import scala.util.{Failure, Success}
 import scala.util.control.Exception._
 
-private[api] trait ApiDigdagServerMockFixture {
+private[api] trait ApiDigdagServerMockFixture extends IOUtils {
 
   import wvlet.airframe.http.finagle._
   import wvlet.airframe.http.{Endpoint, HttpMethod}
@@ -28,13 +31,28 @@ private[api] trait ApiDigdagServerMockFixture {
 
   val finagleDesign: Design = newFinagleServerDesign(port = serverPort, router = router)
 
+  val curDirPath = Paths.get("")
+  val tmpDirPath = Files.createTempDirectory(curDirPath, "test_temp_")
+  val projDir = Files.createTempDirectory(tmpDirPath, "project1_")
+  val dig1 = writeFile(projDir.resolve("test1.dig"),
+    """
+      |+t1:
+      |  echo>: test1
+      |""".stripMargin)
+  val sql1 = writeFile(projDir.resolve("sql").resolve("query1.sql"),
+    """
+      |select count(*) from www_access
+      |""".stripMargin)
+  val projFiles = Seq(dig1, sql1).map(_.toFile)
+
+
   @Endpoint(path = "/api")
   trait DigdagApi {
     @Endpoint(method = HttpMethod.GET, path = "/projects")
     def getPorjects(): Response = {
       val response = Response()
       response.contentString =
-        """
+        s"""
           |{
           |  "projects": [
           |    {
@@ -70,17 +88,21 @@ private[api] trait ApiDigdagServerMockFixture {
      *
      */
 
-    sealed case class PutProjectRequest(project:String, revision:String, schedule_from:Option[String])
+    sealed case class PutProjectRequest(project:String, revision:String, schedule_from:Option[String] = None)
+
     @Endpoint(method = HttpMethod.PUT, path = "/projects")
-    def putPorjects(req:HttpRequest[PutProjectRequest]): Response = {
-      val body = req.contentBytes;
+    def putPorjects(req:HttpMessage.Request): Response = {
+      val body = req.contentBytes
+      println(s"YY body length: ${body.length}")
       //println(new String(body))
       val in = catching(classOf[IOException]) withTry new GZIPInputStream(new ByteArrayInputStream(body))
       val response = Response()
       (req.contentType, in) match {
         case (Some("application/gzip"), Success(in2)) => {
           response.status(Status.Accepted)
-          response.contentString = contentString("aaa", "bbbb")
+          response.contentString = contentString(
+            req.query.getOrElse("project", "unknown"),
+            req.query.getOrElse("revision", "unknown"))
         }
         case (_, Failure(e)) => {
           println(e.toString)
