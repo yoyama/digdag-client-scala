@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ArchiveUtilsTest extends FlatSpec with Matchers with IOUtils {
 
-  def withFixture(testCode: (ArchiveUtils, Path, Path, Seq[File]) => Any) {
+  def withFixture(testCode: (ArchiveUtils, Path, Path, Seq[File]) => Any):Unit = {
     val utils = new ArchiveUtils {}
     val curDirPath = Paths.get("")
     val tmpDirPath = Files.createTempDirectory(curDirPath, "test_temp_")

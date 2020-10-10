@@ -1,7 +1,7 @@
 package io.github.yoyama.digdag.client.api
 
-import java.io.{ByteArrayInputStream, IOException}
-import java.nio.file.{Files, Paths}
+import java.io.{ByteArrayInputStream, File, IOException}
+import java.nio.file.{Files, Path, Paths}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.twitter.finagle.http.{Response, Status}
@@ -12,6 +12,7 @@ import wvlet.airframe.http.{HttpMessage, HttpRequest, Router}
 import java.util.zip.GZIPInputStream
 
 import io.github.yoyama.digdag.client.commons.IOUtils
+import org.apache.commons.io.FileUtils
 
 import scala.util.{Failure, Success}
 import scala.util.control.Exception._
@@ -45,6 +46,14 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
       |""".stripMargin)
   val projFiles = Seq(dig1, sql1).map(_.toFile)
 
+  def runTest(testCode:(Design, Path, Path, Path, Seq[File])=>Unit):Unit = {
+    try {
+      testCode(finagleDesign, curDirPath, tmpDirPath, projDir, projFiles)
+    }
+    finally {
+      FileUtils.deleteDirectory(tmpDirPath.toFile)
+    }
+  }
 
   @Endpoint(path = "/api")
   trait DigdagApi {

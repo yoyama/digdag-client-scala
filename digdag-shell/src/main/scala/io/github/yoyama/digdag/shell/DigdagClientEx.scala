@@ -1,5 +1,7 @@
 package io.github.yoyama.digdag.shell
 
+import java.nio.file.Path
+
 import io.github.yoyama.digdag.client.{ConnectionConfig, DigdagClient}
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpClientScalaJ}
 import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest}
@@ -18,8 +20,44 @@ class DigdagClientEx(client:DigdagClient) extends TablePrint {
   }
 
   def projects: Try[Seq[ProjectRest]] = printTableTry(client.projects(), vertical = vertical)
-  def sessions: Try[Seq[SessionRest]] = printTableTry(client.sessions(), vertical = vertical)
-  def attempts: Try[Seq[AttemptRest]] = printTableTry(client.attempts(), vertical = vertical)
+
+  def push(name:String, dir:Path, revision:String = null): Try[ProjectRest]
+        = printOneTry(client.doPush(name, dir, Option(revision)), vertical = vertical)
+
+  def sessions(size:Long = -1, ncall:Int = 1, filter:(SessionRest=>Boolean) = s=>true) : Try[Seq[SessionRest]] = printTableTry({
+    val pageSize = if (size <= 0) Option.empty[Long] else Some(size)
+    val funcList = (n:Option[Long])=>client.sessions(n, pageSize)
+    val funcId = (s:SessionRest)=>s.id.toLong
+    nCall(ncall, None, funcList, funcId).map(_.filter(filter))
+  }, vertical = vertical)
+
+  def attempts(size:Long = -1, ncall:Int = 1, filter:(AttemptRest=>Boolean) = s=>true): Try[Seq[AttemptRest]] = printTableTry({
+    val pageSize = if (size <= 0) Option.empty[Long] else Some(size)
+    val funcList = (n:Option[Long])=>client.attempts(lastId = n, pageSize = pageSize)
+    val funcId = (a:AttemptRest)=>a.id.toLong
+    nCall(ncall, None, funcList, funcId).map(_.filter(filter))
+  }, vertical = vertical)
+
+  def start(prj:String, wf:String, session:String = null): Try[AttemptRest]
+        =  printOneTry(client.doStart(prj, wf, Option(session))): Try[AttemptRest]
+
+  private def nCall[T](n:Int, lastId:Option[Long], funcList:Option[Long]=>Try[Seq[T]], funcId:(T)=>Long): Try[Seq[T]] = {
+    val ret: (Try[Seq[T]], Option[Long]) = (1 to n).foldLeft((Try(Seq.empty[T]), lastId)) { (acc, _) =>
+      acc match {
+        case (Failure(_), _) => acc
+        case (Success(curSs), curLastId) => {
+          funcList(curLastId) match {
+            case Failure(e2) => (Failure(e2), acc._2)
+            case Success(vlist2) => {
+              val nextLastId = if (vlist2.size > 0) Option(funcId(vlist2.last)) else Option.empty[Long]
+              (Try(curSs ++ vlist2), nextLastId)
+            }
+          }
+        }
+      }
+    }
+    ret._1
+  }
 }
 
 object  DigdagClientEx{
@@ -38,6 +76,8 @@ object  DigdagClientEx{
 
 import scala.reflect.runtime.universe._
 trait TablePrint {
+  def printOneTry[T : ClassTag: TypeTag ](v:Try[T], width:Int = 80, line:Boolean = true, vertical:Boolean = false):Try[T] = printTableTry(v.map(Seq(_)), width, line, vertical).map(_.head)
+
   def printTableTry[T : ClassTag: TypeTag ](seq:Try[Seq[T]], width:Int = 80, line:Boolean = true, vertical:Boolean = false):Try[Seq[T]] = {
     seq match {
       case Success(s) => printTable(s, width, line, vertical)
