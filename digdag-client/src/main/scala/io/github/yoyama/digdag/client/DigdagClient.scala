@@ -1,11 +1,12 @@
 package io.github.yoyama.digdag.client
 
-import java.net.URI
 import java.nio.file.Path
 import java.time.Instant
+import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.commons.Helpers.TryHelper
 import io.github.yoyama.digdag.client.http._
 import io.github.yoyama.digdag.client.model._
 
@@ -116,16 +117,22 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def doKill(attemptId:Long) = ???
 
-  //def doPush
+  def doPush(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest] = {
+    syncTry(projectApi.pushProjectDir(prjName, revision.getOrElse(UUID.randomUUID.toString), prjDir))
+  }
 
-  def doStart(prjName:String, wfName:String, session:Option[String] = None): HttpResult[AttemptRest] = {
-    def getSession = session.map(toInstant(_)).getOrElse(Instant.now())
+  def doStart(prjName:String, wfName:String, session:Option[String] = None): Try[AttemptRest] = {
+    def getSession: Try[Instant] = session match {
+      case None => Success(Instant.now())
+      case Some(s) => toInstant(s)
+    }
     val ret = for {
+      ss <- getSession.toFuture()
       prj <- projectApi.getProject(prjName)
       wf <- projectApi.getWorkflow(Integer.parseInt(prj.id), wfName)
-      apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), getSession)
-    } yield apiResult
-    HttpResult(ret, connInfo.apiWait)
+      apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), ss)
+    } yield apiResult._1
+    syncTry(ret)
   }
 
   //def schedules

@@ -43,11 +43,12 @@ lazy val client = (project in file("digdag-client"))
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
       "com.typesafe.play" %% "play-json" % "2.7.4",
+      "org.apache.commons" % "commons-compress" % "1.20",
+      "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
-      "org.wvlet.airframe" %% "airframe-json" % airframeVersion % Test,
-      "org.wvlet.airframe" %% "airframe-codec" % airframeVersion % Test,
+      //"org.wvlet.airframe" %% "airframe-json" % airframeVersion % Test,
+      //"org.wvlet.airframe" %% "airframe-codec" % airframeVersion % Test,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
-      "org.wvlet.airframe" %% "airspec" % airframeVersion % Test,
       "org.scalactic" %% "scalactic" % "3.0.8" % Test,
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test

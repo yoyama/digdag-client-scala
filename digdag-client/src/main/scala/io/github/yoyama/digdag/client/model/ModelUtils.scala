@@ -46,9 +46,10 @@ trait ModelUtils {
     }
   }
 
-  def toInstant(dt:String): Instant = {
-    OffsetDateTime.parse(dt, dateTimeFormatter).toInstant
+  def toInstant(dt:String): Try[Instant] = {
+    catching(classOf[RuntimeException]) withTry OffsetDateTime.parse(dt, dateTimeFormatter).toInstant
   }
+
   implicit val jsonStringRead  = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = {
       JsSuccess(json.as[String])

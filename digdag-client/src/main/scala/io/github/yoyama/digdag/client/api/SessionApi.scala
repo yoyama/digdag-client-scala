@@ -14,7 +14,7 @@ class SessionApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig){
     val queries =
       Seq(("last_id", lastId), ("page_size", pageSize))
         .filter(_._2.isDefined)            //remove None
-        .map(x => (x._1, x._2.toString))   //convert Long to String
+        .map(x => (x._1, x._2.get.toString))   //convert Long to String
         .toMap                             //Map[String,String]
     val apiPath = srvInfo.endPoint.toString + "/api/sessions"
     for {
