@@ -15,34 +15,6 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-case class HttpResponseException(val resp:SimpleHttpResponse[String]) extends Throwable
-
-sealed abstract class ResultStatus(val code:Int)
-object ResultStatus {
-  case object SUCCESS extends ResultStatus(0)
-  case object FAIL_DESER extends ResultStatus(1)
-  case object FAIL_HTTP extends ResultStatus(2)
-  case object FAIL_OTHERS extends ResultStatus(99)
-}
-
-// SUCCESS => data, resp
-// FAIL_DESER => resp, error
-// FAIL_HTTP  => resp, error
-// FAIL_OTHERS => error
-case class HttpResult[DATA](result:ResultStatus, data:Option[DATA], resp:Option[SimpleHttpResponse[String]],   error:Option[Throwable] = None) extends Throwable
-
-object HttpResult {
-  def apply[DATA](resp:Future[(DATA, SimpleHttpResponse[String])], await:FiniteDuration):HttpResult[DATA] = {
-    val f:Future[HttpResult[DATA]] = resp
-      .map(x => HttpResult(ResultStatus.SUCCESS, Option(x._1), Option(x._2), None))
-      .recover {
-        case e: HttpResponseException => HttpResult(ResultStatus.FAIL_HTTP, None, Option(e.resp), None)
-        case e: Throwable => HttpResult(ResultStatus.FAIL_OTHERS, None, None, Option(e))
-      }
-    Await.result(f, await)
-  }
-}
-
 class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfig) extends ModelUtils {
   implicit val projectApi = new ProjectApi(httpClient, connInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, connInfo)
@@ -115,8 +87,6 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def tasks(attemptId:Long): Try[List[TaskRest]] = syncTry(attemptApi.getTasks(attemptId))
 
-  def doKill(attemptId:Long) = ???
-
   def doPush(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest] = {
     syncTry(projectApi.pushProjectDir(prjName, revision.getOrElse(UUID.randomUUID.toString), prjDir))
   }
@@ -133,6 +103,13 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
       apiResult <- attemptApi.startAttempt(Integer.parseInt(wf.id), ss)
     } yield apiResult._1
     syncTry(ret)
+  }
+
+  def doKill(attemptId:Long): Try[AttemptRest] = syncTry{
+    for {
+      unit <- attemptApi.killAttempt(attemptId)
+      attempt <- attemptApi.getAttempt(attemptId)
+    } yield attempt
   }
 
   //def schedules
