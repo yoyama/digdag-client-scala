@@ -26,7 +26,11 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
   val endPointURL = s"http://localhost:${serverPort}/api"
   val connInfo = ConnectionConfig("test", s"http://localhost:${serverPort}")
   val httpClient = new SimpleHttpClientScalaJ()
-  val api = new ProjectApi(httpClient, connInfo)
+
+  val projectApi = new ProjectApi(httpClient, connInfo)
+  val workflowApi = new WorkflowApi(httpClient, connInfo)
+  val sessionApi = new SessionApi(httpClient, connInfo)
+  val attemptApi = new AttemptApi(httpClient, connInfo)
 
   val router = Router.add[DigdagApi]
 
@@ -46,7 +50,7 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
       |""".stripMargin)
   val projFiles = Seq(dig1, sql1).map(_.toFile)
 
-  def runTest(testCode:(Design, Path, Path, Path, Seq[File])=>Unit):Unit = {
+  def runTest(testCode: (Design, Path, Path, Path, Seq[File]) => Unit): Unit = {
     try {
       testCode(finagleDesign, curDirPath, tmpDirPath, projDir, projFiles)
     }
@@ -62,32 +66,32 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
       val response = Response()
       response.contentString =
         s"""
-          |{
-          |  "projects": [
-          |    {
-          |      "id": "1",
-          |      "name": "prj1",
-          |      "revision": "f4924673-2e31-4582-90c6-bec8f21b4680",
-          |      "createdAt": "2019-05-02T15:10:44Z",
-          |      "updatedAt": "2019-05-02T15:11:31Z",
-          |      "deletedAt": null,
-          |      "archiveType": "db",
-          |      "archiveMd5": "HxSzgWODvdFvHhCFR/nV4w=="
-          |    },
-          |    {
-          |      "id": "2",
-          |      "name": "prj2",
-          |      "revision": "5e8cfbd8-73d9-4de5-84e5-7cb781c82551",
-          |      "createdAt": "2019-05-02T15:12:29Z",
-          |      "updatedAt": "2019-05-02T15:12:29Z",
-          |      "deletedAt": null,
-          |      "archiveType": "db",
-          |      "archiveMd5": "pj7itvGXUqGvtK4P8lhVqQ=="
-          |    }
-          |  ]
-          |}
-          |
-          |""".stripMargin
+           |{
+           |  "projects": [
+           |    {
+           |      "id": "1",
+           |      "name": "prj1",
+           |      "revision": "f4924673-2e31-4582-90c6-bec8f21b4680",
+           |      "createdAt": "2019-05-02T15:10:44Z",
+           |      "updatedAt": "2019-05-02T15:11:31Z",
+           |      "deletedAt": null,
+           |      "archiveType": "db",
+           |      "archiveMd5": "HxSzgWODvdFvHhCFR/nV4w=="
+           |    },
+           |    {
+           |      "id": "2",
+           |      "name": "prj2",
+           |      "revision": "5e8cfbd8-73d9-4de5-84e5-7cb781c82551",
+           |      "createdAt": "2019-05-02T15:12:29Z",
+           |      "updatedAt": "2019-05-02T15:12:29Z",
+           |      "deletedAt": null,
+           |      "archiveType": "db",
+           |      "archiveMd5": "pj7itvGXUqGvtK4P8lhVqQ=="
+           |    }
+           |  ]
+           |}
+           |
+           |""".stripMargin
       response.contentType = "application/json;charset=utf-8"
       response
     }
@@ -97,10 +101,10 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
      *
      */
 
-    sealed case class PutProjectRequest(project:String, revision:String, schedule_from:Option[String] = None)
+    sealed case class PutProjectRequest(project: String, revision: String, schedule_from: Option[String] = None)
 
     @Endpoint(method = HttpMethod.PUT, path = "/projects")
-    def putPorjects(req:HttpMessage.Request): Response = {
+    def putPorjects(req: HttpMessage.Request): Response = {
       val body = req.contentBytes
       println(s"YY body length: ${body.length}")
       //println(new String(body))
@@ -119,22 +123,40 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
         }
         case _ => response.status(Status.BadRequest)
       }
-      def contentString(p:String, r:String) =
+
+      def contentString(p: String, r: String) =
         s"""
-          |    {
-          |      "id": "1",
-          |      "name": "${p}",
-          |      "revision": "${r}",
-          |      "createdAt": "2019-05-02T15:10:44Z",
-          |      "updatedAt": "2019-05-02T15:11:31Z",
-          |      "deletedAt": null,
-          |      "archiveType": "db",
-          |      "archiveMd5": "HxSzgWODvdFvHhCFR/nV4w=="
-          |    }
-          |""".stripMargin
+           |    {
+           |      "id": "1",
+           |      "name": "${p}",
+           |      "revision": "${r}",
+           |      "createdAt": "2019-05-02T15:10:44Z",
+           |      "updatedAt": "2019-05-02T15:11:31Z",
+           |      "deletedAt": null,
+           |      "archiveType": "db",
+           |      "archiveMd5": "HxSzgWODvdFvHhCFR/nV4w=="
+           |    }
+           |""".stripMargin
+
       response.contentType = "application/json;charset=utf-8"
       response
     }
-  }
 
+    @Endpoint(method = HttpMethod.POST, path = "/attempts/:id/kill")
+    def killAttempt(id: Long): Response = {
+      println(s"killAttempt: ${id}")
+      val response = Response()
+      response.status(Status.Accepted)
+      response
+    }
+
+    @Endpoint(method = HttpMethod.GET, path = "/test/:id/kill")
+    def test1(id: Long): Response = {
+      println(s"test ${id}")
+      val response = Response()
+      response.status(Status.BadRequest)
+      response
+    }
+  }
 }
+

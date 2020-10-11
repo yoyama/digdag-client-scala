@@ -64,8 +64,14 @@ trait SimpleHttpClient {
                  (implicit conv:RespConverter[Array[Byte],U]): Future[SimpleHttpResponse[U]] = {
     val r = for {
       req <- createRequest("POST",  uri, queries, headers, Option(contentType), Option(content))
-      resp <- sendRequest(req)
-      body <- Future(conv(resp.body.get, resp.contentType, resp.contentLength)) //ToDo error handling
+      resp <- {
+        println(s"before sendRequest ${req.uri}")
+        sendRequest(req)
+      }
+      body <- {
+        println(s"before conv ${resp.toString()}")
+        Future(conv(resp.body.get, resp.contentType, resp.contentLength))
+      } //ToDo error handling
     } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
     r
   }
@@ -121,7 +127,7 @@ trait SimpleHttpClient {
                               contentType: Option[String] = None, body: Option[String] = None): Future[SimpleHttpRequest[String]] = {
     //ToDo validation
     Future.successful {
-      SimpleHttpRequest(method, uri, None, contentType, headers, queries)
+      SimpleHttpRequest(method, uri, body, contentType, headers, queries)
     }
   }
 
@@ -144,9 +150,9 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient {
   override protected def sendRequest(request: SimpleHttpRequest[String]): Future[SimpleHttpResponse[Array[Byte]]] = {
     Future {
       val sjreq = Http(request.uri).option(HttpOptions.followRedirects(true))
-      val sjresp: HttpResponse[Array[Byte]] = request.method match {
-        case "GET" => sjreq.headers(request.headers).params(request.queries).asBytes
-      }
+      println(s"sendRequest: ${sjreq.toString}")
+      val sjresp: HttpResponse[Array[Byte]] = sjreq.method(request.method).headers(request.headers).params(request.queries).asBytes
+
       SimpleHttpResponse(
         status = sjresp.statusLine,
         contentType = sjresp.contentType,

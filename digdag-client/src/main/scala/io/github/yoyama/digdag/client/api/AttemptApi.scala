@@ -15,18 +15,20 @@ import wvlet.log.LogSupport
 class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) extends LogSupport {
   val apiPathPart = "/api/attempts"
 
-  def getAttempts(prjName:Option[String] = None, wfName:Option[String] = None,
-                  includeRetried:Boolean = false, lastId:Option[Long] = None,
-                  pageSize:Option[Long] = None):Future[List[AttemptRest]] = {
-    def procQueries():Map[String,String] = {
+  def getAttempts(prjName: Option[String] = None, wfName: Option[String] = None,
+                  includeRetried: Boolean = false, lastId: Option[Long] = None,
+                  pageSize: Option[Long] = None): Future[List[AttemptRest]] = {
+    def procQueries(): Map[String, String] = {
       val queriesPart: Map[String, String] =
-        Seq(("project", prjName),("workflow", wfName),("last_id", lastId), ("page_size", pageSize))
-          .filter(_._2.isDefined)            //remove None
-          .map(x => (x._1, x._2.get.toString))   //convert Long to String
-          .toMap                             //Map[String,String]
+        Seq(("project", prjName), ("workflow", wfName), ("last_id", lastId), ("page_size", pageSize))
+          .filter(_._2.isDefined) //remove None
+          .map(x => (x._1, x._2.get.toString)) //convert Long to String
+          .toMap //Map[String,String]
       queriesPart + (("include_retried", includeRetried.toString))
     }
-    def queries: Map[String,String] = procQueries()
+
+    def queries: Map[String, String] = procQueries()
+
     val apiPath = srvInfo.endPoint.toString + apiPathPart
 
     for {
@@ -37,7 +39,7 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
 
   }
 
-  def getAttempt(id:Long):Future[AttemptRest] = {
+  def getAttempt(id: Long): Future[AttemptRest] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}"
     for {
       resp <- httpClient.callGetString(apiPath, Map.empty)
@@ -46,7 +48,7 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     } yield rest
   }
 
-  def getAttemptRetries(id:Long):Future[List[AttemptRest]] = {
+  def getAttemptRetries(id: Long): Future[List[AttemptRest]] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/retries"
     for {
       resp <- httpClient.callGetString(apiPath, Map.empty)
@@ -55,7 +57,7 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     } yield rest
   }
 
-  def getTasks(id:Long):Future[List[TaskRest]] = {
+  def getTasks(id: Long): Future[List[TaskRest]] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/tasks"
     for {
       resp <- httpClient.callGetString(apiPath, Map.empty)
@@ -64,10 +66,10 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     } yield rest
   }
 
-  def startAttempt(workflowId:Long, sessionTime:Instant, retryAttemptName:Option[String] = None,
-                   resumeAttemptId:Option[Long] = None, resumeMode:Option[String] = None,
-                   paramsJson:Option[String] = None): Future[(AttemptRest,SimpleHttpResponse[String])] = {
-    logger.warn("startAttempt called")
+  def startAttempt(workflowId: Long, sessionTime: Instant, retryAttemptName: Option[String] = None,
+                   resumeAttemptId: Option[Long] = None, resumeMode: Option[String] = None,
+                   paramsJson: Option[String] = None): Future[(AttemptRest, SimpleHttpResponse[String])] = {
+    logger.info("startAttempt called")
     val params = paramsJson.map(Json.toJson(_)).getOrElse(JsObject.empty)
     val areq = AttemptRequestRest(workflowId, sessionTime, retryAttemptName, resumeAttemptId, resumeMode, params)
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}"
@@ -77,6 +79,15 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
       data <- AttemptRest.toAttempt(body).toFuture()
     } yield (data, resp)
     ret
+  }
+
+  def killAttempt(id: Long): Future[Unit] = {
+    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/kill"
+    println(s"uri: ${apiPath}")
+    val ret = for {
+      resp <- httpClient.callPostString(apiPath, "application/json", null)
+    } yield resp
+    ret.map(_=>())
   }
 }
 
