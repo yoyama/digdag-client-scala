@@ -31,20 +31,4 @@ class AttemptApiTest extends FlatSpec with Matchers {
       }
     }
   }
-
-  "test" should "works" in {
-    new ApiDigdagServerMockFixture {
-      finagleDesign.build[FinagleServer] { server =>
-        try {
-          Thread.sleep(300*1000)
-        }
-        finally {
-          server.stop
-          FileUtils.deleteDirectory(tmpDirPath.toFile)
-        }
-      }
-    }
-  }
 }
-
-

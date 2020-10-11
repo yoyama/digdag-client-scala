@@ -14,7 +14,18 @@ case class SimpleHttpRequest[T](method:String, uri: String, body:Option[T] = Non
                                 headers: Map[String, String] = Map(), queries: Map[String, String] = Map())
 
 case class SimpleHttpResponse[T](status:String, contentType:Option[String], contentLength:Option[Long], body:Option[T],
-                                 headers: Map[String, Seq[String]])
+                                 headers: Map[String, Seq[String]]) {
+  private[this] val statusCodeRegex = """^HTTP.* (\d+) .*""".r
+
+  def statusCode:Option[Int] = status match {
+    case statusCodeRegex(code) => Option(code.toInt)
+    case _ => None
+  }
+}
+
+case class SimpleHttpException[T](resp:SimpleHttpResponse[T]) extends RuntimeException {
+
+}
 
 object SimpleHttpResponse {
   def bodyUpdate[T,U](src:SimpleHttpResponse[T], body:Option[U])
@@ -35,13 +46,21 @@ trait SimpleHttpClient {
     StandardCharsets.UTF_8
   }
 
+  def checkStatusCode[T](resp:SimpleHttpResponse[T]):Future[SimpleHttpResponse[T]] = {
+    resp.statusCode match {
+      case Some(status) if status >= 200 && status <= 299 => Future.successful(resp)
+      case _ => Future.failed(SimpleHttpException(resp))
+    }
+  }
+
   def callGet[U](uri: String, queries: Map[String, String] = Map(), headers: Map[String, String] = Map())
                 (implicit conv:RespConverter[Array[Byte],U]) : Future[SimpleHttpResponse[U]] = {
     val r = for {
       req <- createRequest("GET", uri, queries, headers, None, None)
       resp <- sendRequest(req)
-      body <- Future(conv(resp.body.get, resp.contentType, resp.contentLength)) //ToDo error handling
-    } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
+      resp2 <- checkStatusCode(resp)
+      body <- Future(conv(resp2.body.get, resp2.contentType, resp2.contentLength)) //ToDo error handling
+    } yield SimpleHttpResponse.bodyUpdate(resp2, Option(body))
     r
   }
 
@@ -54,7 +73,8 @@ trait SimpleHttpClient {
     val r = for {
       req <- createRequest("GET", uri, queries, headers, None, None)
       resp <- sendRequestDownload(req, out)
-    } yield resp
+      resp2 <- checkStatusCode(resp)
+    } yield resp2
     r
   }
 
@@ -68,11 +88,12 @@ trait SimpleHttpClient {
         println(s"before sendRequest ${req.uri}")
         sendRequest(req)
       }
+      resp2 <- checkStatusCode(resp)
       body <- {
-        println(s"before conv ${resp.toString()}")
-        Future(conv(resp.body.get, resp.contentType, resp.contentLength))
+        println(s"before conv ${resp2.toString()}")
+        Future(conv(resp2.body.get, resp2.contentType, resp2.contentLength))
       } //ToDo error handling
-    } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
+    } yield SimpleHttpResponse.bodyUpdate(resp2, Option(body))
     r
   }
 
@@ -89,8 +110,9 @@ trait SimpleHttpClient {
     val r = for {
       req <- createRequest("PUT",  uri, queries, headers, Option(contentType), Option(content))
       resp <- sendRequest(req)
-      body <- Future(conv(resp.body.get, resp.contentType, resp.contentLength)) //ToDo error handling
-    } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
+      resp2 <- checkStatusCode(resp)
+      body <- Future(conv(resp2.body.get, resp2.contentType, resp2.contentLength)) //ToDo error handling
+    } yield SimpleHttpResponse.bodyUpdate(resp2, Option(body))
     r
   }
 
@@ -106,8 +128,9 @@ trait SimpleHttpClient {
     val r = for {
       req <- createRequest("PUT",  uri, queries, headers, contentType, contentPath, 1000*1000) //chunkSize is not used
       resp <- sendRequestUpload(req)
-      body <- Future(stringConverter(resp.body.get, resp.contentType, resp.contentLength))
-    } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
+      resp2 <- checkStatusCode(resp)
+      body <- Future(stringConverter(resp2.body.get, resp2.contentType, resp2.contentLength))
+    } yield SimpleHttpResponse.bodyUpdate(resp2, Option(body))
     r
   }
 
@@ -117,8 +140,9 @@ trait SimpleHttpClient {
     val r = for {
       req <- createRequest("DELETE",  uri, queries, headers, None, None)
       resp <- sendRequest(req)
-      body <- Future(conv(resp.body.get, resp.contentType, resp.contentLength)) //ToDo error handling
-    } yield SimpleHttpResponse.bodyUpdate(resp, Option(body))
+      resp2 <- checkStatusCode(resp)
+      body <- Future(conv(resp2.body.get, resp2.contentType, resp2.contentLength)) //ToDo error handling
+    } yield SimpleHttpResponse.bodyUpdate(resp2, Option(body))
     r
   }
 
@@ -158,7 +182,7 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient {
         contentType = sjresp.contentType,
         contentLength = sjresp.headers.get("content-length").map(_.head.toInt),
         body = Option(sjresp.body),
-          headers = sjresp.headers
+        headers = sjresp.headers
       )
     }
   }

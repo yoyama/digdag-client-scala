@@ -22,7 +22,7 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
   import wvlet.airframe.http.finagle._
   import wvlet.airframe.http.{Endpoint, HttpMethod}
 
-  val serverPort = 55432
+  def serverPort = 55432
   val endPointURL = s"http://localhost:${serverPort}/api"
   val connInfo = ConnectionConfig("test", s"http://localhost:${serverPort}")
   val httpClient = new SimpleHttpClientScalaJ()
