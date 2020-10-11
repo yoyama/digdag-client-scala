@@ -83,8 +83,9 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
 
   def killAttempt(id: Long): Future[Unit] = {
     val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/kill"
+    println(s"uri: ${apiPath}")
     val ret = for {
-      resp <- httpClient.callPostString(apiPath, "application/json", "")
+      resp <- httpClient.callPostString(apiPath, "application/json", null)
     } yield resp
     ret.map(_=>())
   }

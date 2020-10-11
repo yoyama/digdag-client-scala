@@ -1,12 +1,23 @@
 package io.github.yoyama.digdag.client.commons
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.github.yoyama.digdag.client.http.{SimpleHttpClient}
+import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
-import scala.concurrent.Future
-import scala.util.Try
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.util.{Failure, Success, Try}
+import scala.language.postfixOps
 
 object Helpers {
+  implicit class FutureHelper[T](f: Future[T]) {
+    def syncTry(implicit wait: FiniteDuration): Try[T] = {
+      val f2 = f.map(Success(_)).recover {
+        case e:Throwable => Failure(e)
+        case x => Failure(new Throwable(x))
+      }
+      Await.result(f2, wait)
+    }
+  }
 
   implicit class TryHelper[T](t: Try[T]) {
     def toFuture(): Future[T] = Future.fromTry(t)

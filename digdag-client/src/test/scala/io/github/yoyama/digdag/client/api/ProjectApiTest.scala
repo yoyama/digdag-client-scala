@@ -16,7 +16,7 @@ class ProjectApiTest extends FlatSpec with Matchers {
     new ApiDigdagServerMockFixture {
       finagleDesign.build[FinagleServer] { server =>
         try {
-          Await.result(api.getProjects(), 60 seconds) match {
+          Await.result(projectApi.getProjects(), 60 seconds) match {
             case projects: List[ProjectRest] => {
               assert(projects.size == 2)
               assert(projects.head.name == "prj1")
@@ -37,7 +37,7 @@ class ProjectApiTest extends FlatSpec with Matchers {
     new ApiDigdagServerMockFixture {
       finagleDesign.build[FinagleServer] { server =>
         try {
-          Await.result(api.pushProjectDir("projectA", "revisionA", projDir), 60 seconds) match {
+          Await.result(projectApi.pushProjectDir("projectA", "revisionA", projDir), 60 seconds) match {
             case projects: ProjectRest => {
               assert(projects.name == "projectA")
               assert(projects.revision == "revisionA")
