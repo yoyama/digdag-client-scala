@@ -14,6 +14,7 @@ class ProjectApiTest extends FlatSpec with Matchers {
 
   "getProjects" should "works" in {
     new ApiDigdagServerMockFixture {
+      override def serverPort = 15431
       finagleDesign.build[FinagleServer] { server =>
         try {
           Await.result(projectApi.getProjects(), 60 seconds) match {
@@ -35,6 +36,7 @@ class ProjectApiTest extends FlatSpec with Matchers {
 
   "pushProject" should "works" in {
     new ApiDigdagServerMockFixture {
+      override def serverPort = 15432
       finagleDesign.build[FinagleServer] { server =>
         try {
           Await.result(projectApi.pushProjectDir("projectA", "revisionA", projDir), 60 seconds) match {

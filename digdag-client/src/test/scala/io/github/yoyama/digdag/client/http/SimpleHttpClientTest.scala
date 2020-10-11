@@ -7,6 +7,16 @@ import org.scalatest.{FlatSpec, Matchers}
 import wvlet.airframe.http.finagle.FinagleServer
 
 class SimpleHttpClientTest extends FlatSpec with Matchers {
+  "statusCode" should "be parsed" in {
+    val resp = SimpleHttpResponse(status = "HTTP1.1 202 Accepted", contentType = Option("application/json") ,
+                contentLength = None, headers = Map.empty, body = Option("dummy"))
+    resp.statusCode match {
+      case Some(202) => //OK
+      case Some(v) => fail(s"Invalid status code: ${v}")
+      case None => fail(s"Cannot get status code: ${resp.statusCode}")
+    }
+  }
+
   "callGetString" should "work" in {
     new HttpDigdagServerMockFixture {
       design.withSession { ss =>
