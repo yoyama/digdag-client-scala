@@ -17,7 +17,7 @@ import scala.util.control.Exception.catching
 class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) {
   val archiveUtils = new ArchiveUtils {}
 
-  def pushProjectDir(name:String, revision:String, dir:Path, tempDir:Path = archiveUtils.sysTempDir): Future[ProjectRest] = {
+  def pushProjectDir(name: String, revision: String, dir: Path, tempDir: Path = archiveUtils.sysTempDir): Future[ProjectRest] = {
     for {
       archivePath <- catching(classOf[Throwable])
         .withTry(tempDir.resolve(s"digdag_prject_${System.currentTimeMillis}_${Random.nextLong()}.tar.gz"))
@@ -32,7 +32,7 @@ class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     } yield rest
   }
 
-  def pushProject(name:String, revision:String, archive:Path): Future[ProjectRest] = {
+  def pushProject(name: String, revision: String, archive: Path): Future[ProjectRest] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
     val queries = Map("project" -> name, "revision" -> revision)
     for {
@@ -42,50 +42,50 @@ class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     } yield rest
   }
 
-  def getProjects():Future[List[ProjectRest]] = {
+  def getProjects(): Future[List[ProjectRest]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
     httpClient.callGetToRest(apiPath, Map.empty, ProjectRest.toProjects _)
   }
 
-  def getProjects(name:String): Future[List[ProjectRest]] = {
+  def getProjects(name: String): Future[List[ProjectRest]] = {
     val apiPath = srvInfo.endPoint.toString + "/api/projects"
     httpClient.callGetToRest(apiPath, Map("name" -> name), ProjectRest.toProjects _)
   }
 
-  def getProject(id:Long) :Future[ProjectRest] = {
+  def getProject(id: Long): Future[ProjectRest] = {
     val apiPath = srvInfo.endPoint.toString + s"/api/projects/${id}"
     httpClient.callGetToRest(apiPath, Map.empty, ProjectRest.toProject _)
   }
 
-  def getProject(name:String):Future[ProjectRest] = {
+  def getProject(name: String): Future[ProjectRest] = {
     val apiPath = srvInfo.endPoint.toString + "/api/project"
     httpClient.callGetToRest(apiPath, Map("name" -> name), ProjectRest.toProject _)
   }
 
-  def getWorkflows(prjId:Long): Future[List[WorkflowRest]] = {
+  def getWorkflows(prjId: Long): Future[List[WorkflowRest]] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/workflows"
     httpClient.callGetToRest(apiPath, Map.empty, WorkflowRest.toWorkflows _)
   }
 
-  def getWorkflow(prjId:Long, workflowName:String, revision:Option[String] = None): Future[WorkflowRest] = {
+  def getWorkflow(prjId: Long, workflowName: String, revision: Option[String] = None): Future[WorkflowRest] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/workflows/${workflowName}"
-    val queries = Map[String,Option[String]]("revision" -> revision)
+    val queries = Map[String, Option[String]]("revision" -> revision)
       .filter(x => x._2.nonEmpty)
       .map(x => (x._1, x._2.get))
     httpClient.callGetToRest(apiPath, queries, WorkflowRest.toWorkflow _)
   }
 
-  def getSecretKeys(prjId:Long): Future[SecretKeysRest] = {
+  def getSecretKeys(prjId: Long): Future[SecretKeysRest] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets"
     httpClient.callGetToRest(apiPath, Map.empty, SecretKeysRest.toSecretKeysRest _)
   }
 
-  def putSecret(prjId:Long, keyName:String, keyValue:String): Future[Unit] = {
+  def putSecret(prjId: Long, keyName: String, keyValue: String): Future[Unit] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
-    httpClient.callPutString(apiPath, "application/json", s"""{"value" : "${keyValue}"}""").map(_=>())
+    httpClient.callPutString(apiPath, "application/json", s"""{"value" : "${keyValue}"}""").map(_ => ())
   }
 
-  def deleteSecret(prjId:Long, keyName:String): Future[Unit] = {
+  def deleteSecret(prjId: Long, keyName: String): Future[Unit] = {
     import io.github.yoyama.digdag.client.http.SimpleHttpClient.unitConverter
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
     httpClient.callDelete(apiPath)(unitConverter).map(_.body)

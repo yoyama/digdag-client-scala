@@ -195,7 +195,6 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
         .params(request.queries)
       val sjreq2 = if(request.body.isDefined) sjreq1.postData(request.body.getOrElse("")) else sjreq1
       val sjreq = sjreq2.method(request.method) // This must be set after postData()
-
       logger.debug(s"sendRequest: ${sjreq.toString}")
       val sjresp: HttpResponse[Array[Byte]] = sjreq.asBytes
 
