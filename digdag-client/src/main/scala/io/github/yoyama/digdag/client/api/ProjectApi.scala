@@ -90,6 +90,5 @@ class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
     httpClient.callDelete(apiPath)(unitConverter).map(_.body)
   }
-
 }
 
