@@ -32,19 +32,30 @@ object SimpleHttpResponse {
                     = SimpleHttpResponse[U](src.status, src.contentType, src.contentLength, body, src.headers)
 }
 
-trait SimpleHttpClient {
-  implicit val ec = scala.concurrent.ExecutionContext.global
-
-  type RespConverter[A,U] = (A,Option[String],Option[Long])=> U  // (data,content type, size) => converted.
-
-  implicit val stringConverter = (body:Array[Byte], ctype:Option[String], csize:Option[Long]) => {
-    new String(body, ctype.map(contentTypeToCharset(_)).getOrElse(StandardCharsets.UTF_8))
-  }
-
+object SimpleHttpClient {
   def contentTypeToCharset(ctype:String, defaultCharset:Charset = StandardCharsets.UTF_8):Charset = {
     //ToDo implement parse contentType
     StandardCharsets.UTF_8
   }
+
+  implicit val stringConverter = (body:Array[Byte], ctype:Option[String], csize:Option[Long])
+                  => new String(body, ctype.map(contentTypeToCharset(_)).getOrElse(StandardCharsets.UTF_8))
+  implicit val unitConverter = (body: Array[Byte], ctype:Option[String], csize:Option[Long]) => ()
+
+}
+
+trait SimpleHttpClient {
+  import SimpleHttpClient.stringConverter
+  implicit val ec = scala.concurrent.ExecutionContext.global
+
+  type RespConverter[A,U] = (A,Option[String],Option[Long])=> U  // (data,content type, size) => converted.
+
+  /**
+  implicit val stringConverter = (body:Array[Byte], ctype:Option[String], csize:Option[Long]) => {
+    new String(body, ctype.map(contentTypeToCharset(_)).getOrElse(StandardCharsets.UTF_8))
+  }
+  */
+
 
   def checkStatusCode[T](resp:SimpleHttpResponse[T]):Future[SimpleHttpResponse[T]] = {
     resp.statusCode match {
@@ -173,9 +184,17 @@ trait SimpleHttpClient {
 class SimpleHttpClientScalaJ extends SimpleHttpClient {
   override protected def sendRequest(request: SimpleHttpRequest[String]): Future[SimpleHttpResponse[Array[Byte]]] = {
     Future {
-      val sjreq = Http(request.uri).option(HttpOptions.followRedirects(true))
+      val headers = request.contentType.map(h => request.headers + ("Content-Type" -> h)).getOrElse(request.headers)
+      val sjreq1 = Http(request.uri)
+        .option(HttpOptions.followRedirects(true))
+        .headers(headers)
+        .params(request.queries)
+      val sjreq2 = if(request.body.isDefined) sjreq1.postData(request.body.getOrElse("")) else sjreq1
+      val sjreq = sjreq2.method(request.method) // This must be set after postData()
+      
+      println(s"request: ${request.toString}")
       println(s"sendRequest: ${sjreq.toString}")
-      val sjresp: HttpResponse[Array[Byte]] = sjreq.method(request.method).headers(request.headers).params(request.queries).asBytes
+      val sjresp: HttpResponse[Array[Byte]] = sjreq.asBytes
 
       SimpleHttpResponse(
         status = sjresp.statusLine,

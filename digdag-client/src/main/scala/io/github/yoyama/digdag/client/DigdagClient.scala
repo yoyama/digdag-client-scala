@@ -72,10 +72,10 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def tasks(attemptId:Long): Try[List[TaskRest]] = attemptApi.getTasks(attemptId).syncTry(apiWait)
 
-  def doPush(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest]
+  def pushProject(prjName:String, prjDir:Path, revision:Option[String] = None): Try[ProjectRest]
         = projectApi.pushProjectDir(prjName, revision.getOrElse(UUID.randomUUID.toString), prjDir).syncTry(apiWait)
 
-  def doStart(prjName:String, wfName:String, session:Option[String] = None): Try[AttemptRest] = {
+  def startAttempt(prjName:String, wfName:String, session:Option[String] = None): Try[AttemptRest] = {
     def getSession: Try[Instant] = session match {
       case None => Success(Instant.now())
       case Some(s) => toInstant(s)
@@ -89,12 +89,24 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
     ret.syncTry(apiWait)
   }
 
-  def doKill(attemptId:Long): Try[AttemptRest] = {
+  def killAttempt(attemptId:Long): Try[AttemptRest] = {
     val f = for {
       unit <- attemptApi.killAttempt(attemptId)
       attempt <- attemptApi.getAttempt(attemptId)
     } yield attempt
     f.syncTry(apiWait)
+  }
+
+  def secrets(prjId:Long):Try[Seq[String]] = {
+    projectApi.getSecretKeys(prjId).map(_.keys).syncTry(apiWait)
+  }
+
+  def addSecret(prjId:Long, key:String, value:String):Try[Unit] = {
+    projectApi.putSecretKey(prjId, key, value).syncTry(apiWait)
+  }
+
+  def deleteSecret(prjId:Long, key:String):Try[Unit] = {
+    projectApi.deleteSecretKey(prjId, key).syncTry(apiWait)
   }
 
   //def schedules
@@ -106,8 +118,6 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
   //def doScheduleSkip
   //def doScheduleEnable
   //def doScheduleDisable
-
-  //def do(Add|Del)Secrets
 
   //def logFiles(projId)
   //def logDownload(projId)
