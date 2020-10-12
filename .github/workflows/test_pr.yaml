@@ -1,0 +1,21 @@
+name: Run tests on PRs
+
+on: [ pull_request ]
+    
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '8' # The JDK version to make available on the path.
+        java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+        architecture: x64 # (x64 or x86) - defaults to x64
+    - name: Setup SBT and run test
+      uses: lokkju/github-action-sbt@master
+      with:
+        commands: test
+        sbt_project_directory: ./
