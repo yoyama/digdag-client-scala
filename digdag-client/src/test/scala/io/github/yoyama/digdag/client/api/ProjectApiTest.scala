@@ -5,10 +5,13 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import io.github.yoyama.digdag.client.model.ProjectRest
+import io.github.yoyama.digdag.client.commons.Helpers.FutureHelper
+import io.github.yoyama.digdag.client.http.SimpleHttpException
 import org.apache.commons.io.FileUtils
 import wvlet.airframe.http.finagle.FinagleServer
 
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 class ProjectApiTest extends FlatSpec with Matchers {
 
@@ -45,6 +48,36 @@ class ProjectApiTest extends FlatSpec with Matchers {
               assert(projects.revision == "revisionA")
             }
             case x => fail(s"Not ProjectRest: ${x.toString()}")
+          }
+        }
+        finally {
+          server.stop
+          FileUtils.deleteDirectory(tmpDirPath.toFile)
+        }
+      }
+    }
+  }
+
+  "putSecret" should "works" in {
+    new ApiDigdagServerMockFixture {
+      override def serverPort = 15433
+      finagleDesign.build[FinagleServer] { server =>
+        try {
+          projectApi.putSecret(1, "key1", "value1").syncTry(60 seconds) match {
+            case Success(_) => //OK
+            case Failure(e) => {
+              e.printStackTrace()
+              fail(e.toString)
+            }
+          }
+          projectApi.putSecret(99, "key1", "value1").syncTry(60 seconds) match {
+            case Success(_) => fail("Should fail")
+            case Failure(SimpleHttpException(resp)) => {
+              resp.statusCode match {
+                case Some(404) => //OK
+                case x => fail(s"Unexpected status code:${x}")
+              }
+            }
           }
         }
         finally {

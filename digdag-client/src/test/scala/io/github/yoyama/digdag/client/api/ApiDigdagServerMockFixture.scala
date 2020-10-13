@@ -106,8 +106,6 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
     @Endpoint(method = HttpMethod.PUT, path = "/projects")
     def putPorjects(req: HttpMessage.Request): Response = {
       val body = req.contentBytes
-      println(s"YY body length: ${body.length}")
-      //println(new String(body))
       val in = catching(classOf[IOException]) withTry new GZIPInputStream(new ByteArrayInputStream(body))
       val response = Response()
       (req.contentType, in) match {
@@ -139,6 +137,16 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
            |""".stripMargin
 
       response.contentType = "application/json;charset=utf-8"
+      response
+    }
+
+    @Endpoint(method = HttpMethod.PUT, path = "/projects/:id/secrets/:key")
+    def putSecret(id:Long, key:String): Response = {
+      val response = Response()
+      id match {
+        case 1 => response.status(Status.Accepted)
+        case _ => response.status((Status.NotFound))
+      }
       response
     }
 

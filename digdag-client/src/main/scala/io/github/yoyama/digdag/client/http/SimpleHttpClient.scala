@@ -7,6 +7,7 @@ import java.nio.file.{Files, Path}
 
 import scalaj.http.HttpConstants.HttpExec
 import scalaj.http._
+import wvlet.log.LogSupport
 
 import scala.concurrent.Future
 
@@ -24,6 +25,9 @@ case class SimpleHttpResponse[T](status:String, contentType:Option[String], cont
 }
 
 case class SimpleHttpException[T](resp:SimpleHttpResponse[T]) extends RuntimeException {
+  override def toString: String = {
+    s"SimpleHttpException: ${resp.statusCode}"
+  }
 
 }
 
@@ -181,7 +185,7 @@ trait SimpleHttpClient {
 
 }
 
-class SimpleHttpClientScalaJ extends SimpleHttpClient {
+class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
   override protected def sendRequest(request: SimpleHttpRequest[String]): Future[SimpleHttpResponse[Array[Byte]]] = {
     Future {
       val headers = request.contentType.map(h => request.headers + ("Content-Type" -> h)).getOrElse(request.headers)
@@ -191,9 +195,8 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient {
         .params(request.queries)
       val sjreq2 = if(request.body.isDefined) sjreq1.postData(request.body.getOrElse("")) else sjreq1
       val sjreq = sjreq2.method(request.method) // This must be set after postData()
-      
-      println(s"request: ${request.toString}")
-      println(s"sendRequest: ${sjreq.toString}")
+
+      logger.debug(s"sendRequest: ${sjreq.toString}")
       val sjresp: HttpResponse[Array[Byte]] = sjreq.asBytes
 
       SimpleHttpResponse(

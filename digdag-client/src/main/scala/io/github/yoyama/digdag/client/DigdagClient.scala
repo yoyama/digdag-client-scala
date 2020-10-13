@@ -102,11 +102,11 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
   }
 
   def addSecret(prjId:Long, key:String, value:String):Try[Unit] = {
-    projectApi.putSecretKey(prjId, key, value).syncTry(apiWait)
+    projectApi.putSecret(prjId, key, value).syncTry(apiWait)
   }
 
   def deleteSecret(prjId:Long, key:String):Try[Unit] = {
-    projectApi.deleteSecretKey(prjId, key).syncTry(apiWait)
+    projectApi.deleteSecret(prjId, key).syncTry(apiWait)
   }
 
   //def schedules

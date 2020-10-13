@@ -81,12 +81,12 @@ class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     httpClient.callGetToRest(apiPath, Map.empty, SecretKeysRest.toSecretKeysRest _)
   }
 
-  def putSecretKey(prjId:Long, keyName:String, keyValue:String): Future[Unit] = {
+  def putSecret(prjId:Long, keyName:String, keyValue:String): Future[Unit] = {
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
     httpClient.callPutString(apiPath, "application/json", s"""{"value" : "${keyValue}"}""").map(_=>())
   }
 
-  def deleteSecretKey(prjId:Long, keyName:String): Future[Unit] = {
+  def deleteSecret(prjId:Long, keyName:String): Future[Unit] = {
     import io.github.yoyama.digdag.client.http.SimpleHttpClient.unitConverter
     val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
     httpClient.callDelete(apiPath)(unitConverter).map(_.body)
