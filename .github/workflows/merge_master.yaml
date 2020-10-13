@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    braches: [ master ]
+    branches:
+      - master
     
 jobs:
   build:
