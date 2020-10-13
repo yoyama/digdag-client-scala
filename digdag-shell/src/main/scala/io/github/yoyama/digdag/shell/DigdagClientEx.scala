@@ -22,7 +22,7 @@ class DigdagClientEx(client:DigdagClient) extends TablePrint {
   def projects: Try[Seq[ProjectRest]] = printTableTry(client.projects(), vertical = vertical)
 
   def push(name:String, dir:Path, revision:String = null): Try[ProjectRest]
-        = printOneTry(client.doPush(name, dir, Option(revision)), vertical = vertical)
+        = printOneTry(client.pushProject(name, dir, Option(revision)), vertical = vertical)
 
   def sessions(size:Long = -1, ncall:Int = 1, filter:(SessionRest=>Boolean) = s=>true) : Try[Seq[SessionRest]] = printTableTry({
     val pageSize = if (size <= 0) Option.empty[Long] else Some(size)
@@ -39,7 +39,7 @@ class DigdagClientEx(client:DigdagClient) extends TablePrint {
   }, vertical = vertical)
 
   def start(prj:String, wf:String, session:String = null): Try[AttemptRest]
-        =  printOneTry(client.doStart(prj, wf, Option(session))): Try[AttemptRest]
+        =  printOneTry(client.startAttempt(prj, wf, Option(session))): Try[AttemptRest]
 
   private def nCall[T](n:Int, lastId:Option[Long], funcList:Option[Long]=>Try[Seq[T]], funcId:(T)=>Long): Try[Seq[T]] = {
     val ret: (Try[Seq[T]], Option[Long]) = (1 to n).foldLeft((Try(Seq.empty[T]), lastId)) { (acc, _) =>

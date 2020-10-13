@@ -7,7 +7,7 @@ import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.commons.ArchiveUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import io.github.yoyama.digdag.client.model.{ProjectRest, WorkflowRest}
+import io.github.yoyama.digdag.client.model.{ProjectRest, SecretKeysRest, WorkflowRest}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
@@ -74,5 +74,22 @@ class ProjectApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
       .map(x => (x._1, x._2.get))
     httpClient.callGetToRest(apiPath, queries, WorkflowRest.toWorkflow _)
   }
+
+  def getSecretKeys(prjId:Long): Future[SecretKeysRest] = {
+    val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets"
+    httpClient.callGetToRest(apiPath, Map.empty, SecretKeysRest.toSecretKeysRest _)
+  }
+
+  def putSecret(prjId:Long, keyName:String, keyValue:String): Future[Unit] = {
+    val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
+    httpClient.callPutString(apiPath, "application/json", s"""{"value" : "${keyValue}"}""").map(_=>())
+  }
+
+  def deleteSecret(prjId:Long, keyName:String): Future[Unit] = {
+    import io.github.yoyama.digdag.client.http.SimpleHttpClient.unitConverter
+    val apiPath = srvInfo.endPoint.toASCIIString + s"/api/projects/${prjId}/secrets/${keyName}"
+    httpClient.callDelete(apiPath)(unitConverter).map(_.body)
+  }
+
 }
 
