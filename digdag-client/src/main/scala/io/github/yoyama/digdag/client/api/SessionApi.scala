@@ -1,9 +1,9 @@
 package io.github.yoyama.digdag.client.api
 
-import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.model.{AttemptRest, SessionRest}
-import io.github.yoyama.digdag.client.http.{SimpleHttpClient}
+import io.github.yoyama.digdag.client.http.SimpleHttpClient
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper}
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

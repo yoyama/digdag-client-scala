@@ -3,6 +3,7 @@ package io.github.yoyama.digdag.shell
 import scala.tools.nsc.{Properties, Settings}
 import scala.tools.nsc.interpreter.shell.{ILoop, ShellConfig}
 import io.github.yoyama.digdag.client._
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 
 import scala.sys.Prop
 import scala.tools.nsc.interpreter.Results.Result

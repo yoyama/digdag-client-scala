@@ -5,13 +5,13 @@ import java.nio.file.{Files, Path, Paths}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.twitter.finagle.http.{Response, Status}
-import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.http.SimpleHttpClientScalaJ
 import wvlet.airframe.Design
 import wvlet.airframe.http.{HttpMessage, HttpRequest, Router}
 import java.util.zip.GZIPInputStream
 
 import io.github.yoyama.digdag.client.commons.IOUtils
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import org.apache.commons.io.FileUtils
 
 import scala.util.{Failure, Success}

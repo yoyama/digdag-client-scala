@@ -3,12 +3,12 @@ package io.github.yoyama.digdag.client.api
 import java.nio.file.{Files, Path}
 import java.time.LocalDateTime
 
-import io.github.yoyama.digdag.client.ConnectionConfig
 import io.github.yoyama.digdag.client.commons.ArchiveUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.model.{ProjectRest, SecretKeysRest, WorkflowRest}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
 
 import scala.util.Random

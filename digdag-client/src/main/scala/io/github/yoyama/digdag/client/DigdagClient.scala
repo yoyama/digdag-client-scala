@@ -6,7 +6,8 @@ import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
-import io.github.yoyama.digdag.client.commons.Helpers.{FutureHelper,TryHelper}
+import io.github.yoyama.digdag.client.commons.Helpers.{FutureHelper, TryHelper}
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http._
 import io.github.yoyama.digdag.client.model._
 
