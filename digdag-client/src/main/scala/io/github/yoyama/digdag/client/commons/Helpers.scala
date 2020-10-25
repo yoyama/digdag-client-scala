@@ -30,6 +30,13 @@ object Helpers {
       case None => Future.failed(e)
       case Some(v) => Future.successful(v)
     }
+
+    def toTry(message:String): Try[T] = toTry(new Throwable(message))
+
+    def toTry(e:Throwable): Try[T] = t match {
+      case None => Failure(e)
+      case Some(v) => Success(v)
+    }
   }
 
   implicit class EitherHelper[L,R](v: Either[L,R]) {
