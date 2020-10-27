@@ -1,11 +1,11 @@
 package io.github.yoyama.digdag.client
 
 
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpResponse}
-import org.scalatest.{FlatSpec}
+import org.scalatest.FlatSpec
 import org.mockito.Mockito._
-import org.mockito.Matchers.{any,eq => eqTo}
-
+import org.mockito.Matchers.{any, eq => eqTo}
 import wvlet.log.LogSupport
 
 import scala.concurrent.{ExecutionContext, Future}

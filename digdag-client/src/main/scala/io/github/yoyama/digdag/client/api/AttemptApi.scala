@@ -3,13 +3,13 @@ package io.github.yoyama.digdag.client.api
 import java.time.Instant
 
 import io.github.yoyama.digdag.client.model.{AttemptRest, TaskRest}
-import io.github.yoyama.digdag.client.ConnectionConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpResponse}
 import io.github.yoyama.digdag.client.model.request.AttemptRequestRest
 import play.api.libs.json.{JsObject, Json}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import wvlet.log.LogSupport
 
 class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) extends LogSupport {

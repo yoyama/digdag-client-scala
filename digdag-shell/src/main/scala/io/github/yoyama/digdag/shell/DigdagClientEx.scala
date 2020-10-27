@@ -2,7 +2,8 @@ package io.github.yoyama.digdag.shell
 
 import java.nio.file.Path
 
-import io.github.yoyama.digdag.client.{ConnectionConfig, DigdagClient}
+import io.github.yoyama.digdag.client.DigdagClient
+import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpClientScalaJ}
 import io.github.yoyama.digdag.client.model.{AttemptRest, ProjectRest, SessionRest}
 
