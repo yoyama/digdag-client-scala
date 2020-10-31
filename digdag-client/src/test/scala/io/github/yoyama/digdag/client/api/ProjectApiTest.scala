@@ -75,9 +75,11 @@ class ProjectApiTest extends FlatSpec with Matchers {
             case Failure(SimpleHttpException(resp)) => {
               resp.statusCode match {
                 case Some(404) => //OK
-                case x => fail(s"Unexpected status code:${x}")
+                case Some(x) => fail(s"Unexpected status code:${x}")
+                case None => fail(s"No status code")
               }
             }
+            case Failure(e) => fail(s"Unexpected failure: ${e.toString}")
           }
         }
         finally {
