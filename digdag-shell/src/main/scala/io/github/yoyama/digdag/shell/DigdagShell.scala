@@ -36,8 +36,8 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
     "import io.github.yoyama.digdag.client.config.ConnectionConfig",
     "import io.github.yoyama.digdag.client.DigdagClient",
     "import io.github.yoyama.digdag.shell.{DigdagClientEx, DigdagShell}",
-    """implicit val conn = DigdagShell.connMap.getOrElse(DigdagShell.connName.getOrElse("digdag"), null) """,
-    """val dc = DigdagClient(conn)""",
+    """implicit val connectionConfig = DigdagShell.connMap.getOrElse(DigdagShell.connName.getOrElse("digdag"), null) """,
+    """val dc = DigdagClient(connectionConfig)""",
     """val dcx = DigdagClientEx(dc)"""
   )
 
@@ -64,12 +64,11 @@ class DigdagILoop(val shellConfig:ShellConfig) extends ILoop(shellConfig) {
       case Nil => "No connection"
       case conn :: xs => {
         echoCommandMessage(s"""${conn} is set""")
-        intp.interpret(s"""implicit val connectionConfig = DigdagShell.connMap(conn)""")
+        intp.interpret(s"""implicit val connectionConfig = DigdagShell.connMap("${conn}")""")
         intp.interpret("""val dc = DigdagClient(connectionConfig)""")
         intp.interpret("""val dcx = DigdagClientEx(connectionConfig)""")
         ""
       }
-      case _ => "Not yet implemented"
     }
     Result(true, Some(ret))
   }
