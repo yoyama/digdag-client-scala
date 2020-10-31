@@ -10,10 +10,12 @@ import io.github.yoyama.digdag.client.model.request.AttemptRequestRest
 import play.api.libs.json.{JsObject, Json}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
 import io.github.yoyama.digdag.client.config.ConnectionConfig
-import wvlet.log.LogSupport
 
-class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implicit val ec:ExecutionContext) extends LogSupport {
-  val apiPathPart = "/api/attempts"
+
+class AttemptApi(httpClient: SimpleHttpClient, connConfig:ConnectionConfig)(implicit val ec:ExecutionContext)
+              extends BasicApi(connConfig) {
+  override def apiPathPart = "/api/attempts"
+
 
   def getAttempts(prjName: Option[String] = None, wfName: Option[String] = None,
                   includeRetried: Boolean = false, lastId: Option[Long] = None,
@@ -28,39 +30,35 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     }
 
     def queries: Map[String, String] = procQueries()
-
-    val apiPath = srvInfo.endPoint.toString + apiPathPart
-
     for {
-      resp <- httpClient.callGetString(apiPath, queries = queries)
+      resp <- httpClient.callGetString(apiPathBase, queries = queries, headers = headers())
       body <- resp.body.toFuture("No body data")
       rest <- AttemptRest.toAttempts(body).toFuture()
     } yield rest
-
   }
 
   def getAttempt(id: Long): Future[AttemptRest] = {
-    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}"
+    val apiPath = s"${apiPathBase}/${id}"
     for {
-      resp <- httpClient.callGetString(apiPath, Map.empty)
+      resp <- httpClient.callGetString(apiPath, queries = Map.empty, headers = headers())
       body <- resp.body.toFuture("No body data")
       rest <- AttemptRest.toAttempt(body).toFuture()
     } yield rest
   }
 
   def getAttemptRetries(id: Long): Future[List[AttemptRest]] = {
-    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/retries"
+    val apiPath = s"${apiPathBase}/${id}/retries"
     for {
-      resp <- httpClient.callGetString(apiPath, Map.empty)
+      resp <- httpClient.callGetString(apiPath, queries = Map.empty, headers = headers())
       body <- resp.body.toFuture("No body data")
       rest <- AttemptRest.toAttempts(body).toFuture()
     } yield rest
   }
 
   def getTasks(id: Long): Future[List[TaskRest]] = {
-    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/tasks"
+    val apiPath = s"${apiPathBase}/${id}/tasks"
     for {
-      resp <- httpClient.callGetString(apiPath, Map.empty)
+      resp <- httpClient.callGetString(apiPath, queries = Map.empty, headers = headers())
       body <- resp.body.toFuture("No body data")
       rest <- TaskRest.toTasks(body).toFuture()
     } yield rest
@@ -72,9 +70,9 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
     logger.info("startAttempt called")
     val params = paramsJson.map(Json.toJson(_)).getOrElse(JsObject.empty)
     val areq = AttemptRequestRest(workflowId, sessionTime, retryAttemptName, resumeAttemptId, resumeMode, params)
-    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}"
     val ret = for {
-      resp <- httpClient.callPutString(apiPath, "application/json", Json.toJson(areq).toString())
+      resp <- httpClient.callPutString(apiPathBase, "application/json", Json.toJson(areq).toString()
+                , queries = Map.empty, headers = headers())
       body <- resp.body.toFuture("No body data")
       data <- AttemptRest.toAttempt(body).toFuture()
     } yield (data, resp)
@@ -82,10 +80,10 @@ class AttemptApi(httpClient: SimpleHttpClient, srvInfo:ConnectionConfig)(implici
   }
 
   def killAttempt(id: Long): Future[Unit] = {
-    val apiPath = srvInfo.endPoint.toString + s"${apiPathPart}/${id}/kill"
-    println(s"uri: ${apiPath}")
+    val apiPath = s"${apiPathBase}/${id}/kill"
     val ret = for {
-      resp <- httpClient.callPostString(apiPath, "application/json", null)
+      resp <- httpClient.callPostString(apiPath, "application/json", null
+                , queries = Map.empty, headers = headers())
     } yield resp
     ret.map(_=>())
   }

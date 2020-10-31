@@ -48,9 +48,10 @@ object Helpers {
 
   implicit class SimpleHttpClientHelper[RESP](cl:SimpleHttpClient) {
 
-    def callGetToRest[T](apiPath:String, queries: Map[String,String], funcToRest:String=>Try[T]):Future[T] = {
+    def callGetToRest[T](apiPath:String, funcToRest:String=>Try[T]
+                         , queries: Map[String,String] = Map.empty, headers: Map[String,String] = Map.empty):Future[T] = {
       for {
-        r1 <- cl.callGetString(apiPath, queries)
+        r1 <- cl.callGetString(apiPath, queries, headers)
         r2 <- Future.fromTry(funcToRest(r1.body.get))
       } yield r2
     }
