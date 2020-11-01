@@ -57,7 +57,10 @@ object ConnectionConfig {
         }
       }
     }
-    Success(listConfigR(dir))
+    if (Files.exists(dir))
+      Success(listConfigR(dir))
+    else
+      Success(Seq.empty)
   }
 
   protected def props2Config(path:Path, props:Properties):Try[ConnectionConfig] = {

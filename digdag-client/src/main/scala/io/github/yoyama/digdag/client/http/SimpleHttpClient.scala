@@ -9,7 +9,7 @@ import scalaj.http.HttpConstants.HttpExec
 import scalaj.http._
 import wvlet.log.LogSupport
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class SimpleHttpRequest[T](method:String, uri: String, body:Option[T] = None, contentType:Option[String] = None,
                                 headers: Map[String, String] = Map(), queries: Map[String, String] = Map())
@@ -50,7 +50,7 @@ object SimpleHttpClient {
 
 trait SimpleHttpClient {
   import SimpleHttpClient.stringConverter
-  implicit val ec = scala.concurrent.ExecutionContext.global
+  implicit val ec:ExecutionContext // = scala.concurrent.ExecutionContext.global
 
   type RespConverter[A,U] = (A,Option[String],Option[Long])=> U  // (data,content type, size) => converted.
 
@@ -186,6 +186,8 @@ trait SimpleHttpClient {
 }
 
 class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
+  override implicit val ec:ExecutionContext = scala.concurrent.ExecutionContext.global
+
   override protected def sendRequest(request: SimpleHttpRequest[String]): Future[SimpleHttpResponse[Array[Byte]]] = {
     Future {
       val headers = request.contentType.map(h => request.headers + ("Content-Type" -> h)).getOrElse(request.headers)
