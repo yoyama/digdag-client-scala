@@ -88,7 +88,7 @@ class ProjectApi(httpClient: SimpleHttpClient, connConfig:ConnectionConfig)(impl
   def deleteSecret(prjId: Long, keyName: String): Future[Unit] = {
     import io.github.yoyama.digdag.client.http.SimpleHttpClient.unitConverter
     val apiPath = s"${apiPathBase}/${prjId}/secrets/${keyName}"
-    httpClient.callDelete(apiPath, headers = headers())(unitConverter).map(_.body)
+    httpClient.callDelete(apiPath, headers = headers())(unitConverter).map(_ => ())
   }
 }
 

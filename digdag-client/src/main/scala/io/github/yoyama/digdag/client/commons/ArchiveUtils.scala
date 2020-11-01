@@ -45,7 +45,7 @@ trait ArchiveUtils {
   private[commons] def listRecur(f:File): Seq[File] = {
     f match {
       case f if f.isFile => Seq(f)
-      case f => f.listFiles().flatMap(f2 => listRecur(f2))
+      case f => f.listFiles().toIndexedSeq.flatMap(f2 => listRecur(f2))
     }
   }
 
