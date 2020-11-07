@@ -66,7 +66,7 @@ lazy val shell = (project in file("digdag-shell"))
       "org.scala-lang" % "scala-compiler" % scala213,
       "org.scala-lang" % "scala-library" % scala213,
       "org.scala-lang" % "scala-reflect" % scala213,
-      "com.lihaoyi" % "ammonite" % "2.2.0",
+      "com.lihaoyi" % "ammonite" % "2.2.0" cross CrossVersion.full,
       "org.scalactic" %% "scalactic" % "3.0.8" % Test,
       "org.scalatest" %% "scalatest" % "3.0.8" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
