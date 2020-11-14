@@ -1,4 +1,4 @@
-name: CI
+name: Merge master
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     
 jobs:
   build:
-    name: Build all
+    name: Build and tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,6 +17,11 @@ jobs:
         java-version: '8' # The JDK version to make available on the path.
         java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
         architecture: x64 # (x64 or x86) - defaults to x64
+    - name: Cache SBT ivy cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
     - name: Setup SBT and build
       uses: lokkju/github-action-sbt@master
       with:
