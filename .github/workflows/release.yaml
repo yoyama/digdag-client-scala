@@ -17,6 +17,11 @@ jobs:
         java-version: '8' # The JDK version to make available on the path.
         java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
         architecture: x64 # (x64 or x86) - defaults to x64
+    - name: Cache SBT ivy cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
     - name: Setup SBT and build
       uses: lokkju/github-action-sbt@master
       with:
@@ -43,6 +48,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./pkg-digdag-shell/digdag-shell.jar .
+        asset_path: ./pkg-digdag-shell/digdag-shell.jar
         asset_name: digdag-shell.jar
         asset_content_type: application/java-archive
