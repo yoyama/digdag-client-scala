@@ -1,6 +1,8 @@
+name: Scala Steward
+
 on:
   schedule:
-    - cron: '10 1 * * 0'
+    - cron: '15 1 * * *'
 
 jobs:
   scala-steward:
