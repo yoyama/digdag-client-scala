@@ -28,9 +28,9 @@ jobs:
     steps:
     - name: prepare for the package
       run: |
-      mkdir pkg-digdag-shell
-      cd pkg-digdag-shell
-      cp ../digdag-shell/target/scala-2.13/digdag-shell.jar .
+        mkdir pkg-digdag-shell
+        cd pkg-digdag-shell
+        cp ../digdag-shell/target/scala-2.13/digdag-shell.jar .
   create-release:
     name: create a release
     runs-on: ubuntu-latest
