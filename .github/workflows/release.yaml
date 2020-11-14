@@ -1,0 +1,47 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v.*'
+
+jobs:
+  build:
+    name: Build all
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: '8' # The JDK version to make available on the path.
+        java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+        architecture: x64 # (x64 or x86) - defaults to x64
+    - name: Setup SBT and build
+      uses: lokkju/github-action-sbt@master
+      with:
+        commands: clean test assembly
+        sbt_project_directory: ./
+  digdag-shell:
+    name: digdag-shell
+    runs-on: ubuntu-latest
+    steps:
+    - name: prepare for the package
+      run: |
+      mkdir pkg-digdag-shell
+      cd pkg-digdag-shell
+      cp ../digdag-shell/target/scala-2.13/digdag-shell.jar .
+  create-release:
+    name: create a release
+    runs-on: ubuntu-latest
+    steps:
+    - name: create a release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: true
