@@ -39,7 +39,7 @@ lazy val airframeVersion = "20.10.3"
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
-    name := "client-lib",
+    name := "digdag-client-lib-scala",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
       "com.typesafe.play" %% "play-json" % "2.9.1",
