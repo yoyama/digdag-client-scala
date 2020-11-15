@@ -9,6 +9,7 @@ lazy val commonSettings = Seq(
   assemblyMergeStrategy in assembly := {
     //case PathList(ps@_*) if ps.last contains "io.netty.versions.properties" => MergeStrategy.first
     case x if x contains "io.netty.versions.properties" => MergeStrategy.first
+    case "module-info.class" => MergeStrategy.discard
     case x => {
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)

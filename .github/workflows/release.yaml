@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
     - name: Setup SBT and build
       uses: lokkju/github-action-sbt@master
       with:
-        commands: clean test assembly
+        commands: clean test package assembly
         sbt_project_directory: ./
     - name: prepare for the package
       run: |
