@@ -35,14 +35,14 @@ lazy val root = (project in file("."))
     test in assembly := {}
   )
 
-lazy val airframeVersion = "20.9.2"
+lazy val airframeVersion = "20.10.3"
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
     name := "client-lib",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "com.typesafe.play" %% "play-json" % "2.7.4",
+      "com.typesafe.play" %% "play-json" % "2.9.1",
       "org.apache.commons" % "commons-compress" % "1.20",
       "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
