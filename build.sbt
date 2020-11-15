@@ -35,7 +35,7 @@ lazy val root = (project in file("."))
     test in assembly := {}
   )
 
-lazy val airframeVersion = "20.9.2"
+lazy val airframeVersion = "20.10.3"
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
