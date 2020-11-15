@@ -42,7 +42,7 @@ lazy val client = (project in file("digdag-client"))
     name := "client-lib",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "com.typesafe.play" %% "play-json" % "2.7.4",
+      "com.typesafe.play" %% "play-json" % "2.9.1",
       "org.apache.commons" % "commons-compress" % "1.20",
       "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
