@@ -1,10 +1,11 @@
 package io.github.yoyama.digdag.client.model
 
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Try
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class WorkflowRestTest extends FlatSpec with Matchers {
+class WorkflowRestTest extends AnyFlatSpec with Matchers {
 
   "Valid json" should "parsed" in {
     val data = """{

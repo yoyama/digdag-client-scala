@@ -3,7 +3,6 @@ package io.github.yoyama.digdag.client
 
 import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http.{SimpleHttpClient, SimpleHttpResponse}
-import org.scalatest.FlatSpec
 import org.mockito.Mockito._
 import org.mockito.Matchers.{any, eq => eqTo}
 import wvlet.log.LogSupport
@@ -11,8 +10,9 @@ import wvlet.log.LogSupport
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.concurrent.duration._
+import org.scalatest.flatspec.AnyFlatSpec
 
-class DigdagClientTest  extends FlatSpec with LogSupport {
+class DigdagClientTest  extends AnyFlatSpec with LogSupport {
 
   "version" should "succeed" in {
     new Fixture {

@@ -3,10 +3,11 @@ package io.github.yoyama.digdag.client.http
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.SECONDS
-import org.scalatest.{FlatSpec, Matchers}
 import wvlet.airframe.http.finagle.FinagleServer
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SimpleHttpClientTest extends FlatSpec with Matchers {
+class SimpleHttpClientTest extends AnyFlatSpec with Matchers {
   "statusCode" should "be parsed" in {
     val resp = SimpleHttpResponse(status = "HTTP1.1 202 Accepted", contentType = Option("application/json") ,
                 contentLength = None, headers = Map.empty, body = Option("dummy"))

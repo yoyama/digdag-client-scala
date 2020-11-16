@@ -2,11 +2,12 @@ package io.github.yoyama.digdag.client.model
 
 import java.time.OffsetDateTime
 
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SessionRestTest extends FlatSpec with Matchers {
+class SessionRestTest extends AnyFlatSpec with Matchers {
 
   "Valid json" should "parsed" in {
     val data = """{

@@ -1,10 +1,11 @@
 package io.github.yoyama.digdag.client.model
 
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SecretRestTest extends FlatSpec with Matchers {
+class SecretRestTest extends AnyFlatSpec with Matchers {
 
   "Valid json with keys" should "parsed" in {
     val data = """{
