@@ -51,7 +51,7 @@ lazy val client = (project in file("digdag-client"))
       //"org.wvlet.airframe" %% "airframe-codec" % airframeVersion % Test,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
       "org.scalactic" %% "scalactic" % "3.2.3" % Test,
-      "org.scalatest" %% "scalatest" % "3.0.9" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.3" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
     testFrameworks += new TestFramework("wvlet.airspec.Framework")
@@ -68,7 +68,7 @@ lazy val shell = (project in file("digdag-shell"))
       "org.scala-lang" % "scala-library" % scala213,
       "org.scala-lang" % "scala-reflect" % scala213,
       "org.scalactic" %% "scalactic" % "3.2.3" % Test,
-      "org.scalatest" %% "scalatest" % "3.0.9" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.3" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
     assemblyJarName in assembly := "digdag-shell.jar",

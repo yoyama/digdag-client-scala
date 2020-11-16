@@ -1,6 +1,5 @@
 package io.github.yoyama.digdag.client.api
 
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -12,8 +11,10 @@ import wvlet.airframe.http.finagle.FinagleServer
 
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ProjectApiTest extends FlatSpec with Matchers {
+class ProjectApiTest extends AnyFlatSpec with Matchers {
 
   "getProjects" should "works" in {
     new ApiDigdagServerMockFixture {
