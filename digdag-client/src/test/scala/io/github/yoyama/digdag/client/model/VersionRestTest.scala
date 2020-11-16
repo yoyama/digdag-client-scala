@@ -1,10 +1,11 @@
 package io.github.yoyama.digdag.client.model
 
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class VersionRestTest extends FlatSpec with Matchers {
+class VersionRestTest extends AnyFlatSpec with Matchers {
 
   "Valid json" should "parsed" in {
     val data = """{"version":"0.9.42"}""".stripMargin

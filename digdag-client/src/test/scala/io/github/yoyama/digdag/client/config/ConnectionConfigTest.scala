@@ -5,9 +5,10 @@ import java.nio.file.{Files, Paths}
 
 import io.github.yoyama.digdag.client.commons.IOUtils
 import org.apache.commons.io.FileUtils
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class ConnectionConfigTest extends FlatSpec with Matchers with IOUtils {
+class ConnectionConfigTest extends AnyFlatSpec with Matchers with IOUtils {
 
   "loadAll(dir)" should "return empty" in {
     val configs = ConnectionConfig.loadAll(Paths.get("/tmp/non_existed_dir"))

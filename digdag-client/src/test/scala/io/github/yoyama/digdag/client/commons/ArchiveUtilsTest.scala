@@ -2,7 +2,6 @@ package io.github.yoyama.digdag.client.commons
 
 import java.io.File
 
-import org.scalatest.{FlatSpec, Matchers}
 import java.nio.file.{Files, Path, Paths}
 
 import org.apache.commons.io.FileUtils
@@ -11,9 +10,11 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration.Inf
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 
-class ArchiveUtilsTest extends FlatSpec with Matchers with IOUtils {
+class ArchiveUtilsTest extends AnyFlatSpec with Matchers with IOUtils {
 
   def withFixture(testCode: (ArchiveUtils, Path, Path, Seq[File]) => Any):Unit = {
     val utils = new ArchiveUtils {}

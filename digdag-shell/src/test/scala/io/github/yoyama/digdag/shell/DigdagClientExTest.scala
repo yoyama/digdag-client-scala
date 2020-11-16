@@ -2,7 +2,8 @@ package io.github.yoyama.digdag.shell
 
 import java.util.Date
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 
 class DigdagClientExTest {
@@ -11,7 +12,7 @@ class DigdagClientExTest {
 
 sealed case class Data(no:Int, name:String, date:Date, description:Option[String] = None)
 
-class TablePrintTest  extends FlatSpec with Matchers {
+class TablePrintTest  extends AnyFlatSpec with Matchers {
   sealed trait Fixture {
     val data = Seq(
       Data(1, "Test Taro", new Date()),

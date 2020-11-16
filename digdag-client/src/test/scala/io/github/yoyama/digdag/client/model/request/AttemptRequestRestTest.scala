@@ -2,10 +2,11 @@ package io.github.yoyama.digdag.client.model.request
 
 
 import io.github.yoyama.digdag.client.model.{ModelUtils, SessionRest}
-import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, Json}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class AttemptRequestRestTest extends FlatSpec with Matchers with ModelUtils{
+class AttemptRequestRestTest extends AnyFlatSpec with Matchers with ModelUtils{
   "convert to json" should "work" in {
     val testData = List(
       (AttemptRequestRest(3, toInstant("2019-01-01T01:11:00Z").get),
