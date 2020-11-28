@@ -63,7 +63,7 @@ class AttemptRestTest extends AnyFlatSpec with Matchers {
     attempts match {
       case Success(a) => {
         assert(a.size == 2)
-        assert(a.head.sessionTime ==  OffsetDateTime.parse( "2019-05-02T15:12:38+00:00", SessionRest.dateTimeFormatter).toInstant)
+        assert(a.head.sessionTime ==  OffsetDateTime.parse( "2019-05-02T15:12:38+00:00", AttemptRest.dateTimeFormatter).toInstant)
         assert(a.head.retryAttemptName.isEmpty)
       }
       case Failure(exception) => {

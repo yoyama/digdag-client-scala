@@ -5,7 +5,7 @@ import java.time.Instant
 import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, SessionApi, VersionApi, WorkflowApi}
+import io.github.yoyama.digdag.client.api.{AttemptApi, ProjectApi, ScheduleApi, SessionApi, VersionApi, WorkflowApi}
 import io.github.yoyama.digdag.client.commons.Helpers.{FutureHelper, TryHelper}
 import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http._
@@ -19,6 +19,7 @@ import scala.util.{Failure, Success, Try}
 class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfig) extends ModelUtils {
   val projectApi = new ProjectApi(httpClient, connInfo)
   implicit val workflowApi = new WorkflowApi(httpClient, connInfo)
+  implicit val scheduleApi = new ScheduleApi(httpClient, connInfo)
   implicit val sessionApi = new SessionApi(httpClient, connInfo)
   implicit val attemptApi = new AttemptApi(httpClient, connInfo)
   implicit val versionApi = new VersionApi(httpClient, connInfo)
@@ -54,6 +55,18 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
   def workflow(prjId:Long, name:String): Try[WorkflowRest] = projectApi.getWorkflow(prjId, name).syncTry(apiWait)
 
   def workflow(prj:ProjectRest, name:String): Try[WorkflowRest] = workflow(prj.id, name)
+
+  def schedules(lastId:Option[Long] = None): Try[List[ScheduleRest]] = scheduleApi.getSchedules(lastId).syncTry(apiWait)
+
+  def schedule(id:Long): Try[ScheduleRest] = scheduleApi.getSchedule(id).syncTry(apiWait)
+
+  def schEnable(id:Long): Try[ScheduleRest] = scheduleApi.enable(id).syncTry(apiWait)
+
+  def schDisable(id:Long): Try[ScheduleRest] = scheduleApi.disable(id).syncTry(apiWait)
+
+  def schSkip(id:Long) = ???
+
+  def schBackfill(id:Long) = ???
 
   def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Try[Seq[SessionRest]] = sessionApi.getSessions(lastId, pageSize).syncTry(apiWait)
 
@@ -109,16 +122,6 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
   def deleteSecret(prjId:Long, key:String):Try[Unit] = {
     projectApi.deleteSecret(prjId, key).syncTry(apiWait)
   }
-
-  //def schedules
-
-  //def schedule
-
-  //def doScheduleUpdate
-  //def doScheduleBackfill
-  //def doScheduleSkip
-  //def doScheduleEnable
-  //def doScheduleDisable
 
   //def logFiles(projId)
   //def logDownload(projId)

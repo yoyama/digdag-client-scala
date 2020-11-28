@@ -35,6 +35,8 @@ object AttemptRest extends ModelUtils {
 
   def toAttempts(response:String):Try[List[AttemptRest]] = getAsList[AttemptRest](response, "attempts")
 
+  def toAttemptsFromBackfill(response:String):Try[List[AttemptRest]] = getAsList[AttemptRest](response,"attempts")
+
   def toAttempts(jsonArray:JsArray):Try[List[AttemptRest]] = getAsList(jsonArray)
 
   def toAttempt(response:String):Try[AttemptRest] = getAsSingle(response)
