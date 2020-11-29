@@ -1,7 +1,7 @@
 package io.github.yoyama.digdag.client
 
 import java.nio.file.Path
-import java.time.Instant
+import java.time.{Instant, OffsetDateTime}
 import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -64,13 +64,28 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def schDisable(id:Long): Try[ScheduleRest] = scheduleApi.disable(id).syncTry(apiWait)
 
-  def schSkip(id:Long) = ???
+  def schSkip(id:Long, count:Option[Long] = None, fromTime:Option[Instant] = None, nextTime:Option[OffsetDateTime] = None,
+              nextRunTime:Option[Instant] = None, dryRun:Boolean = false): Try[ScheduleRest]
+          = scheduleApi.skip(id, count, fromTime, nextTime, nextRunTime, dryRun).syncTry(apiWait)
 
-  def schBackfill(id:Long) = ???
+  def schBackfill(id:Long, fromTime:Instant, attemptName:String, dryRun:Boolean = false, count:Option[Long] = None): Try[List[AttemptRest]]
+          = scheduleApi.backfill(id, fromTime, attemptName, dryRun, count).syncTry(apiWait)
 
   def sessions(lastId:Option[Long] = None, pageSize:Option[Long] = None): Try[Seq[SessionRest]] = sessionApi.getSessions(lastId, pageSize).syncTry(apiWait)
 
-  def sessions(prjName:String, wfName:String): Try[Seq[SessionRest]] = ??? //syncOpt(sessionApi.getSessions())
+  //For convenience and avoid default argument error
+  def sessions(prjName:String): Try[Seq[SessionRest]] = sessions(prjName, None, None, None)
+  def sessions(prjName:String, wfName:String): Try[Seq[SessionRest]] = sessions(prjName, Option(wfName), None, None)
+  def sessions(prjName:String, lastId:Option[Long], pageSize:Option[Long]): Try[Seq[SessionRest]] = sessions(prjName, None, lastId, pageSize)
+  def sessions(prjName:String, wfName:String, lastId:Option[Long], pageSize:Option[Long]): Try[Seq[SessionRest]] = sessions(prjName, Option(wfName), None, None)
+
+  def sessions(prjName:String, wfName:Option[String], lastId:Option[Long], pageSize:Option[Long]): Try[Seq[SessionRest]] = {
+    val ss = for {
+      project <- projectApi.getProject(prjName)
+      ss <- projectApi.getSessions(project.id.toLong, wfName, lastId, pageSize)
+    } yield ss
+    ss.syncTry(apiWait)
+  }
 
   def session(id:Long): Try[SessionRest] = sessionApi.getSession(id).syncTry(apiWait)
 

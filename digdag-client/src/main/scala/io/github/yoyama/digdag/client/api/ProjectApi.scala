@@ -5,7 +5,7 @@ import java.nio.file.{Files, Path}
 import io.github.yoyama.digdag.client.commons.ArchiveUtils
 
 import scala.concurrent.{ExecutionContext, Future}
-import io.github.yoyama.digdag.client.model.{ProjectRest, SecretKeysRest, WorkflowRest}
+import io.github.yoyama.digdag.client.model.{ProjectRest, SecretKeysRest, SessionRest, WorkflowRest}
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, SimpleHttpClientHelper, TryHelper}
 import io.github.yoyama.digdag.client.config.ConnectionConfig
 import io.github.yoyama.digdag.client.http.SimpleHttpClient
@@ -89,6 +89,22 @@ class ProjectApi(httpClient: SimpleHttpClient, connConfig:ConnectionConfig)(impl
     import io.github.yoyama.digdag.client.http.SimpleHttpClient.unitConverter
     val apiPath = s"${apiPathBase}/${prjId}/secrets/${keyName}"
     httpClient.callDelete(apiPath, headers = headers())(unitConverter).map(_ => ())
+  }
+
+  def getSessions(prjId:Long, wfName:Option[String] = None, lastId: Option[Long] = None, pageSize: Option[Long] = None): Future[List[SessionRest]] = {
+    val apiPath = s"${apiPathBase}/${prjId}/sessions"
+    val queryParams: Map[String, String] =
+      Seq(("workflow", wfName), ("last_id", lastId), ("page_size", pageSize))
+        .filter(_._2.isDefined)
+        .map(x => (x._1, x._2.get.toString)) //convert Long to String
+        .toMap
+
+    for {
+      resp <- httpClient.callGetString(apiPath, queries = queryParams, headers = headers())
+      body <- resp.body.toFuture("No body data")
+      rest <- SessionRest.toSessions(body).toFuture()
+    } yield rest
+
   }
 }
 
