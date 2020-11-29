@@ -91,8 +91,16 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
   def attempts(sessionId:Long): Try[Seq[AttemptRest]] = sessionApi.getAttempts(sessionId).syncTry(apiWait)
 
-  def attempts(prjName:Option[String] = None, wfName:Option[String] = None, includeRetried:Boolean = false,
-               lastId:Option[Long] = None, pageSize:Option[Long] = None  ): Try[Seq[AttemptRest]]
+  //For convenience and avoid default argument error
+  def attempts(): Try[Seq[AttemptRest]] = attempts(None, None, false, None, None)
+  def attempts(lastId:Option[Long], pageSize:Option[Long]): Try[Seq[AttemptRest]] = attempts(None, None, false, lastId, pageSize)
+  def attempts(prjName:String): Try[Seq[AttemptRest]] = attempts(Option(prjName), None, false, None, None)
+  def attempts(prjName:String, wfName:String): Try[Seq[AttemptRest]] = attempts(Option(prjName), Option(wfName), false, None, None)
+  def attempts(prjName:String, wfName:String, includeRetried:Boolean, lastId:Option[Long], pageSize:Option[Long]): Try[Seq[AttemptRest]]
+            = attempts(Option(prjName), Option(wfName), includeRetried, lastId, pageSize)
+
+  def attempts(prjName:Option[String], wfName:Option[String], includeRetried:Boolean,
+               lastId:Option[Long], pageSize:Option[Long]): Try[Seq[AttemptRest]]
         = attemptApi.getAttempts(prjName, wfName, includeRetried, lastId, pageSize).syncTry(apiWait)
 
   def attempt(id:Long): Try[AttemptRest] = attemptApi.getAttempt(id).syncTry(apiWait)
