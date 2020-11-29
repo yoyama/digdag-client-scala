@@ -15,7 +15,7 @@ import org.scalatest.matchers.should.Matchers
 class AttemptApiTest extends AnyFlatSpec with Matchers {
 
   "kill an attempt" should "works" in {
-    new ApiDigdagServerMockFixture {
+    new ApiDigdagServerFixture {
       finagleDesign.build[FinagleServer] { server =>
         try {
           attemptApi.killAttempt(100).syncTry(60 seconds) match {

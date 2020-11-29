@@ -37,13 +37,16 @@ lazy val root = (project in file("."))
   )
 
 lazy val airframeVersion = "20.11.0"
+val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
+
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
     name := "digdag-client-lib-scala",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "com.typesafe.play" %% "play-json" % "2.9.1",
+      "com.typesafe.play" %% "play-json" % "2.9.1"
+        excludeAll(excludeJackson),
       "org.apache.commons" % "commons-compress" % "1.20",
       "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
