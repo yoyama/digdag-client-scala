@@ -8,7 +8,7 @@ import io.github.yoyama.digdag.client.config.ConnectionConfig
 import scala.concurrent.{ExecutionContext, Future}
 
 class SessionApi(httpClient: SimpleHttpClient, connConfig:ConnectionConfig)(implicit val ec:ExecutionContext) extends BasicApi(connConfig) {
-  override def apiPathPart = "/api/attempts"
+  override def apiPathPart = "/api/sessions"
 
   def getSessions(lastId:Option[Long] = None, pageSize:Option[Long] = None):Future[List[SessionRest]] = {
 

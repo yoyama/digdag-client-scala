@@ -17,7 +17,7 @@ import org.apache.commons.io.FileUtils
 import scala.util.{Failure, Success}
 import scala.util.control.Exception._
 
-private[api] trait ApiDigdagServerMockFixture extends IOUtils {
+private[api] trait ApiDigdagServerFixture extends IOUtils {
 
   import wvlet.airframe.http.finagle._
   import wvlet.airframe.http.{Endpoint, HttpMethod}
@@ -32,7 +32,8 @@ private[api] trait ApiDigdagServerMockFixture extends IOUtils {
   val sessionApi = new SessionApi(httpClient, connInfo)
   val attemptApi = new AttemptApi(httpClient, connInfo)
 
-  val router = Router.add[DigdagApi]
+  def router = Router.add[DigdagApi]
+  //val router = Router.add[DigdagApi]
 
   val finagleDesign: Design = newFinagleServerDesign(port = serverPort, router = router)
 

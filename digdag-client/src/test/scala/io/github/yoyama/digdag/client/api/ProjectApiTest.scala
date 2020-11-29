@@ -17,7 +17,7 @@ import org.scalatest.matchers.should.Matchers
 class ProjectApiTest extends AnyFlatSpec with Matchers {
 
   "getProjects" should "works" in {
-    new ApiDigdagServerMockFixture {
+    new ApiDigdagServerFixture {
       override def serverPort = 15431
       finagleDesign.build[FinagleServer] { server =>
         try {
@@ -39,7 +39,7 @@ class ProjectApiTest extends AnyFlatSpec with Matchers {
   }
 
   "pushProject" should "works" in {
-    new ApiDigdagServerMockFixture {
+    new ApiDigdagServerFixture {
       override def serverPort = 15432
       finagleDesign.build[FinagleServer] { server =>
         try {
@@ -60,7 +60,7 @@ class ProjectApiTest extends AnyFlatSpec with Matchers {
   }
 
   "putSecret" should "works" in {
-    new ApiDigdagServerMockFixture {
+    new ApiDigdagServerFixture {
       override def serverPort = 15433
       finagleDesign.build[FinagleServer] { server =>
         try {
