@@ -16,6 +16,13 @@ lazy val commonSettings = Seq(
     }
   },
 )
+
+lazy val githubPackageSetting: Seq[Setting[_]] = Seq(
+  githubOwner := "yoyama",
+  githubRepository := "digdag-client-scala",
+  githubTokenSource := TokenSource.Environment("GITHUB_TOKEN") || TokenSource.GitConfig("github.token"),
+)
+
 ThisBuild / scalaVersion     := scala213
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "io.github.yoyama"
@@ -30,10 +37,11 @@ ThisBuild / cancelable in Global := true
 lazy val root = (project in file("."))
   .aggregate(client, shell)
   .settings(commonSettings: _*)
+  .settings(githubPackageSetting: _*)
   .settings(
     name := "digdag-client-scala",
     testFrameworks += new TestFramework("wvlet.airspec.Framework"),
-    test in assembly := {}
+    test in assembly := {},
   )
 
 lazy val airframeVersion = "20.11.0"
@@ -41,6 +49,7 @@ val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
 
 lazy val client = (project in file("digdag-client"))
   .settings(commonSettings: _*)
+  .settings(githubPackageSetting: _*)
   .settings(
     name := "digdag-client-lib-scala",
     libraryDependencies ++= Seq(
@@ -57,13 +66,14 @@ lazy val client = (project in file("digdag-client"))
       "org.scalatest" %% "scalatest" % "3.2.3" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
-    testFrameworks += new TestFramework("wvlet.airspec.Framework")
+    testFrameworks += new TestFramework("wvlet.airspec.Framework"),
     //fork in run := true
   )
 
 
 lazy val shell = (project in file("digdag-shell"))
   .settings(commonSettings: _*)
+  .settings(githubPackageSetting: _*)
   .settings(
     name := "digdag-shell",
     libraryDependencies ++= Seq(
