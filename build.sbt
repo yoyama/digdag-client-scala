@@ -1,8 +1,7 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val scala212 = "2.12.10"
 lazy val scala213 = "2.13.3"
-lazy val supportedScalaVersions = List(scala212, scala213)
+lazy val supportedScalaVersions = List(scala213)
 
 lazy val commonSettings = Seq(
   test in assembly := {},
@@ -26,9 +25,26 @@ ThisBuild / homepage         := Some(url("https://github.com/yoyama/digdag-clien
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature")
 ThisBuild / cancelable in Global := true
 //ThisBuild / coverageEnabled := true
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/yoyama/digdag-client-scala"),
+    "scm:git@github.com:yoyama/digdag-client-scala.git"
+  )
+)
+ThisBuild / description := "A Scala client library for Digdag and Digdag Shell"
+ThisBuild / licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / isSnapshot := true
+ThisBuild / publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / publishMavenStyle := true
+//ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 lazy val root = (project in file("."))
-  .aggregate(client, shell)
+  .aggregate(client_lib, shell)
   .settings(commonSettings: _*)
   .settings(
     name := "digdag-client-scala",
@@ -39,7 +55,7 @@ lazy val root = (project in file("."))
 lazy val airframeVersion = "20.11.0"
 val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
 
-lazy val client = (project in file("digdag-client"))
+lazy val client_lib = (project in file("digdag-client"))
   .settings(commonSettings: _*)
   .settings(
     name := "digdag-client-lib-scala",
@@ -76,4 +92,4 @@ lazy val shell = (project in file("digdag-shell"))
     ),
     assemblyJarName in assembly := "digdag-shell.jar",
   )
-  .dependsOn(client)
+  .dependsOn(client_lib)
