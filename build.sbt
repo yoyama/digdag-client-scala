@@ -1,7 +1,11 @@
+import scala.sys.process._
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val scala213 = "2.13.3"
+lazy val scala213 = "2.13.4"
 lazy val supportedScalaVersions = List(scala213)
+
+lazy val genDigdagShell: TaskKey[Unit] = taskKey[Unit]("Generate digdag-shell executable")
 
 lazy val commonSettings = Seq(
   test in assembly := {},
@@ -91,5 +95,11 @@ lazy val shell = (project in file("digdag-shell"))
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
     assemblyJarName in assembly := "digdag-shell.jar",
+    genDigdagShell := {
+      assembly.value
+      println("genDigdagShell called")
+      "bin/gen_shell.sh" !
+    },
   )
   .dependsOn(client_lib)
+
