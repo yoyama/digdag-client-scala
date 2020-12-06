@@ -52,7 +52,7 @@ lazy val root = (project in file("."))
     test in assembly := {}
   )
 
-lazy val airframeVersion = "20.11.0"
+lazy val airframeVersion = "20.12.1"
 val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
 
 lazy val client_lib = (project in file("digdag-client"))
