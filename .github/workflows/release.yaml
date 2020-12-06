@@ -30,7 +30,7 @@ jobs:
     - name: prepare for the package
       run: |
         mkdir pkg-digdag-shell
-        cp ./digdag-shell/target/scala-2.13/digdag-shell.jar ./pkg-digdag-shell/
+        cp ./target/digdag-shell.jar ./pkg-digdag-shell/
     - name: create a release
       id: create_release
       uses: actions/create-release@v1.1.4
