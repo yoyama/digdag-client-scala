@@ -1,7 +1,10 @@
+import scala.sys.process._
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val scala213 = "2.13.3"
-lazy val supportedScalaVersions = List(scala213)
+lazy val scala213 = "2.13.4"
+
+lazy val genDigdagShell: TaskKey[Unit] = taskKey[Unit]("Generate digdag-shell executable")
 
 lazy val commonSettings = Seq(
   test in assembly := {},
@@ -41,7 +44,6 @@ ThisBuild / publishTo := {
   else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
 ThisBuild / publishMavenStyle := true
-//ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 lazy val root = (project in file("."))
   .aggregate(client_lib, shell)
@@ -61,13 +63,10 @@ lazy val client_lib = (project in file("digdag-client"))
     name := "digdag-client-lib-scala",
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
-      "com.typesafe.play" %% "play-json" % "2.9.1"
-        excludeAll(excludeJackson),
+      "com.typesafe.play" %% "play-json" % "2.9.1" excludeAll(excludeJackson),
       "org.apache.commons" % "commons-compress" % "1.20",
       "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
-      //"org.wvlet.airframe" %% "airframe-json" % airframeVersion % Test,
-      //"org.wvlet.airframe" %% "airframe-codec" % airframeVersion % Test,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
       "org.scalactic" %% "scalactic" % "3.2.3" % Test,
       "org.scalatest" %% "scalatest" % "3.2.3" % Test,
@@ -84,12 +83,16 @@ lazy val shell = (project in file("digdag-shell"))
     name := "digdag-shell",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-compiler" % scala213,
-      "org.scala-lang" % "scala-library" % scala213,
-      "org.scala-lang" % "scala-reflect" % scala213,
       "org.scalactic" %% "scalactic" % "3.2.3" % Test,
       "org.scalatest" %% "scalatest" % "3.2.3" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
-    assemblyJarName in assembly := "digdag-shell.jar",
+    assemblyJarName in assembly := "digdag-shell-assembly.jar",
+    genDigdagShell := {
+      assembly.value
+      println("genDigdagShell called")
+      "bin/gen_shell.sh" !
+    },
   )
   .dependsOn(client_lib)
+
