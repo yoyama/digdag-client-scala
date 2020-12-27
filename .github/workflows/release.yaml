@@ -10,6 +10,11 @@ jobs:
     name: create a release
     runs-on: ubuntu-latest
     steps:
+    - name: GPG setup
+      run: |
+        echo "test" > test1.txt
+        echo '${{ secrets.PGP_KEY }}' | GPG_TTY=$tty gpg --import --batch --yes
+        GPG_TTY=$tty gpg --batch --pinentry-mode loopback --passphrase ${{ secrets.PGP_PASSPHRASE }} --detach-sign --armor --use-agent --default-key ${{ secrets.PGP_DEFAULT_KEY_ID }} --output test1.txt.asc test1.txt
     - uses: actions/checkout@v2
     - name: Setup JDK
       uses: actions/setup-java@v1
@@ -31,6 +36,11 @@ jobs:
       run: |
         mkdir pkg-digdag-shell
         cp ./target/digdag-shell.jar ./pkg-digdag-shell/
+    - name: publishSigned
+      env:
+        PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+      run: |
+        PGP_PASSPHRASE=${{ secrets.PGP_PASSPHRASE }} GPG_TTY=$tty ./sbt --batch publishSigned
     - name: create a release
       id: create_release
       uses: actions/create-release@v1.1.4

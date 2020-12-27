@@ -45,6 +45,8 @@ ThisBuild / publishTo := {
 }
 ThisBuild / publishMavenStyle := true
 
+usePgpKeyHex("81F6732F799BC1EDC50A6F2367252D29216B11DC")
+
 lazy val root = (project in file("."))
   .aggregate(client_lib, shell)
   .settings(commonSettings: _*)
