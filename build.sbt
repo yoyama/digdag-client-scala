@@ -38,11 +38,12 @@ ThisBuild / description := "A Scala client library for Digdag and Digdag Shell"
 ThisBuild / licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 ThisBuild / pomIncludeRepository := { _ => false }
 ThisBuild / isSnapshot := true
-ThisBuild / publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+//ThisBuild / publishTo := {
+//  val nexus = "https://oss.sonatype.org/"
+//  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+//  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+// }
+ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / publishMavenStyle := true
 
 usePgpKeyHex("81F6732F799BC1EDC50A6F2367252D29216B11DC")

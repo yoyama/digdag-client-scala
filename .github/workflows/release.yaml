@@ -16,31 +16,21 @@ jobs:
         echo '${{ secrets.PGP_KEY }}' | GPG_TTY=$tty gpg --import --batch --yes
         GPG_TTY=$tty gpg --batch --pinentry-mode loopback --passphrase ${{ secrets.PGP_PASSPHRASE }} --detach-sign --armor --use-agent --default-key ${{ secrets.PGP_DEFAULT_KEY_ID }} --output test1.txt.asc test1.txt
     - uses: actions/checkout@v2
-    - name: Setup JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: '8' # The JDK version to make available on the path.
-        java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
-        architecture: x64 # (x64 or x86) - defaults to x64
-    - name: Cache SBT ivy cache
-      uses: actions/cache@v1
-      with:
-        path: ~/.ivy2/cache
-        key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
-    - name: Setup SBT and build
-      uses: lokkju/github-action-sbt@master
-      with:
-        commands: clean test package genDigdagShell
-        sbt_project_directory: ./
-    - name: prepare for the package
+    - uses: olafurpg/setup-scala@v10
+    - name: Build code and package
+      run: |
+        sbt clean test package genDigdagShell
+    - name: Prepare for digdag-shell
       run: |
         mkdir pkg-digdag-shell
         cp ./target/digdag-shell.jar ./pkg-digdag-shell/
     - name: publishSigned
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+        SONATYPE_USERNAME: '${{ secrets.SONATYPE_USER }}'
+        SONATYPE_PASSWORD: '${{ secrets.SONATYPE_PASS }}'
       run: |
-        PGP_PASSPHRASE=${{ secrets.PGP_PASSPHRASE }} GPG_TTY=$tty ./sbt --batch publishSigned
+        PGP_PASSPHRASE=${{ secrets.PGP_PASSPHRASE }} GPG_TTY=$tty sbt publishSigned
     - name: create a release
       id: create_release
       uses: actions/create-release@v1.1.4
