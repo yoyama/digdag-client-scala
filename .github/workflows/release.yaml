@@ -20,10 +20,6 @@ jobs:
     - name: Build code and package
       run: |
         sbt clean test package genDigdagShell
-    - name: Prepare for digdag-shell
-      run: |
-        mkdir pkg-digdag-shell
-        cp ./target/digdag-shell.jar ./pkg-digdag-shell/
     - name: publishSigned
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
@@ -31,6 +27,10 @@ jobs:
         SONATYPE_PASSWORD: '${{ secrets.SONATYPE_PASS }}'
       run: |
         PGP_PASSPHRASE=${{ secrets.PGP_PASSPHRASE }} GPG_TTY=$tty sbt publishSigned
+    - name: Prepare for digdag-shell
+      run: |
+        mkdir pkg-digdag-shell
+        cp ./target/digdag-shell.jar ./pkg-digdag-shell/
     - name: create a release
       id: create_release
       uses: actions/create-release@v1.1.4
