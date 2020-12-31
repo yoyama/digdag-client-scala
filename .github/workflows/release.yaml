@@ -26,7 +26,7 @@ jobs:
         SONATYPE_USERNAME: '${{ secrets.SONATYPE_USER }}'
         SONATYPE_PASSWORD: '${{ secrets.SONATYPE_PASS }}'
       run: |
-        PGP_PASSPHRASE=${{ secrets.PGP_PASSPHRASE }} GPG_TTY=$tty sbt publishSigned
+        sbt publishSigned
     - name: Prepare for digdag-shell
       run: |
         mkdir pkg-digdag-shell
