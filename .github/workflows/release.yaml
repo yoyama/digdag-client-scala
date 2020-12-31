@@ -26,8 +26,9 @@ jobs:
         SONATYPE_USERNAME: '${{ secrets.SONATYPE_USER }}'
         SONATYPE_PASSWORD: '${{ secrets.SONATYPE_PASS }}'
       run: |
-        sbt publishSigned
-    - name: Prepare for digdag-shell
+        sbt client_lib/publishSigned
+        sbt shell/publishSigned
+    - name: Prepare for creation of release
       run: |
         mkdir pkg-digdag-shell
         cp ./target/digdag-shell.jar ./pkg-digdag-shell/
