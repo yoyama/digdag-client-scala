@@ -57,7 +57,7 @@ lazy val root = (project in file("."))
     test in assembly := {}
   )
 
-lazy val airframeVersion = "20.12.2"
+lazy val airframeVersion = "21.1.0"
 val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
 
 lazy val client_lib = (project in file("digdag-client"))
@@ -70,7 +70,6 @@ lazy val client_lib = (project in file("digdag-client"))
       "org.apache.commons" % "commons-compress" % "1.20",
       "commons-io" % "commons-io" % "2.8.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
-      "org.wvlet.airframe" %% "airframe-di-macros" % airframeVersion  % Test,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
       "org.scalactic" %% "scalactic" % "3.2.3" % Test,
       "org.scalatest" %% "scalatest" % "3.2.3" % Test,
