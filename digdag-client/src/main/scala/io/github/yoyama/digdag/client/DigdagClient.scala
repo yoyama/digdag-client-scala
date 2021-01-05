@@ -24,7 +24,7 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
   implicit val attemptApi = new AttemptApi(httpClient, connInfo)
   implicit val versionApi = new VersionApi(httpClient, connInfo)
 
-  val apiWait = connInfo.apiWait
+  val apiWait = connInfo.apiConnWait
 
   def projects(): Try[Seq[ProjectRest]] = projectApi.getProjects().syncTry(apiWait)
 
@@ -155,7 +155,10 @@ class DigdagClient(val httpClient:SimpleHttpClient, val connInfo:ConnectionConfi
 
 object DigdagClient {
   def apply(connInfo:ConnectionConfig = ConnectionConfig.local): DigdagClient = {
-    new DigdagClient(new SimpleHttpClientScalaJ, connInfo)
+    new DigdagClient(new SimpleHttpClientScalaJ(
+          connTimeout = connInfo.apiConnWait.length.toInt,
+          readTimeOut = connInfo.apiReadWait.length.toInt
+    ), connInfo)
   }
 
   def apply(httpClient: SimpleHttpClient, connInfo:ConnectionConfig): DigdagClient = {

@@ -13,14 +13,15 @@ import scala.util.control.Exception.catching
 import scala.concurrent.duration.FiniteDuration
 import io.github.yoyama.digdag.client.commons.Helpers.{OptionHelper, TryHelper}
 
-case class ConnectionConfig(name: String, endPoint: URI, auth: AuthConfig, headers: Map[String, String], apiWait: FiniteDuration) {
+case class ConnectionConfig(name: String, endPoint: URI, auth: AuthConfig, headers: Map[String, String], apiConnWait: FiniteDuration, apiReadWait: FiniteDuration) {
   def apiEndPoint(uriPart: String): String = endPoint.toString + uriPart
 }
 
 object ConnectionConfig {
   def apply(name: String, endPoint: String, auth: AuthConfig = AuthConfigNone(),
-            headers: Map[String, String] = Map(), apiWait: FiniteDuration = 30 second)
-          = new ConnectionConfig(name, new URI(endPoint), auth, headers, apiWait)
+            headers: Map[String, String] = Map(),
+            apiConnWait: FiniteDuration = 30 second, apiReadWait: FiniteDuration = 30 second)
+          = new ConnectionConfig(name, new URI(endPoint), auth, headers, apiConnWait, apiReadWait)
 
   def localEndpoint = "http://localhost:65432"
   def local = ConnectionConfig("local", localEndpoint)
@@ -69,7 +70,11 @@ object ConnectionConfig {
       endPoint <- Option(props.getProperty("client.http.endpoint", localEndpoint)).toTry("No endpoint")
       authConfig <- getAuthConfig(props)
       headers <- getHeaders(props)
-    } yield ConnectionConfig(configName, endPoint, authConfig, headers, 60 seconds)
+      timeouts <- getHttpTimeout(props)
+    } yield ConnectionConfig(
+        configName, endPoint, authConfig, headers,
+        timeouts._1.getOrElse(60 seconds), timeouts._2.getOrElse(60 seconds)
+    )
   }
 
   protected def getConfigName(path:Path, props:Properties):Try[String] = {
@@ -96,6 +101,14 @@ object ConnectionConfig {
       }
     }
     Success(headers)
+  }
+
+  protected def getHttpTimeout(props:Properties):Try[(Option[FiniteDuration], Option[FiniteDuration])] = {
+    val connTimeout = Option(props.getProperty("client.http.timeout.connection"))
+      .map(ms => FiniteDuration(ms.toLong, SECONDS))
+    val readTimeout = Option(props.getProperty("client.http.timeout.read"))
+      .map(ms => FiniteDuration(ms.toLong, SECONDS))
+    Success(connTimeout, readTimeout)
   }
 
   protected def loadProperties(path: Path): Try[Properties] = {
