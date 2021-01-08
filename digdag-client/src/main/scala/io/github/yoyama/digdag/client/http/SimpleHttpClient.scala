@@ -185,16 +185,13 @@ trait SimpleHttpClient {
 
 }
 
-class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
+class SimpleHttpClientScalaJ(connTimeout:Int = 1000, readTimeOut:Int = 5000) extends SimpleHttpClient with LogSupport {
   override implicit val ec:ExecutionContext = scala.concurrent.ExecutionContext.global
 
   override protected def sendRequest(request: SimpleHttpRequest[String]): Future[SimpleHttpResponse[Array[Byte]]] = {
     Future {
       val headers = request.contentType.map(h => request.headers + ("Content-Type" -> h)).getOrElse(request.headers)
-      val sjreq1 = Http(request.uri)
-        .option(HttpOptions.followRedirects(true))
-        .headers(headers)
-        .params(request.queries)
+      val sjreq1 = httpRequest(request.uri, headers, request.queries)
       val sjreq2 = if(request.body.isDefined) sjreq1.postData(request.body.getOrElse("")) else sjreq1
       val sjreq = sjreq2.method(request.method) // This must be set after postData()
       logger.debug(s"sendRequest: ${sjreq.toString}")
@@ -210,6 +207,14 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
     }
   }
 
+  private def httpRequest(uri:String, headers:Map[String,String], params:Map[String,String]): HttpRequest = {
+    Http(uri).headers(headers).params(params)
+      .options(Seq(
+        HttpOptions.followRedirects(true),
+        HttpOptions.connTimeout(connTimeout),
+        HttpOptions.readTimeout(readTimeOut)
+      ))
+  }
   override protected def sendRequestUpload(request: SimpleHttpRequest[Path]):Future[SimpleHttpResponse[Array[Byte]]] = {
     val uploadConnectFunc:HttpExec = (sjreq:HttpRequest, conn:HttpURLConnection) => {
       conn.setDoOutput(true)
@@ -222,12 +227,8 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
         case Some(ct) => request.headers. + ("Content-Type" -> ct)
         case None => request.headers
       }
-      val sjreq =
-        Http(request.uri)
-          .option(HttpOptions.followRedirects(true))
-          .headers(reqHeaders)
-          .params(request.queries)
-          .copy(connectFunc = uploadConnectFunc)
+      val sjreq = httpRequest(request.uri, reqHeaders, request.queries)
+        .copy(connectFunc = uploadConnectFunc)
 
       val sjresp: HttpResponse[Array[Byte]] = request.method match {
         case "POST" => sjreq.method("POST").asBytes
@@ -245,7 +246,7 @@ class SimpleHttpClientScalaJ extends SimpleHttpClient with LogSupport {
 
   override protected def sendRequestDownload(request: SimpleHttpRequest[String], out:Path):Future[SimpleHttpResponse[Path]] = {
     Future {
-      val sjreq = Http(request.uri).option(HttpOptions.followRedirects(true))
+      val sjreq = httpRequest(request.uri, Map.empty, Map.empty)
       val sjresp: HttpResponse[Path] = request.method match {
         case "GET" => sjreq.headers(request.headers).params(request.queries).execute( (in:InputStream) => {
           assert(in != null)
