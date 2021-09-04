@@ -8,19 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup JDK
-      uses: actions/setup-java@v1
+    - name: Setup Scala
+      uses: olafurpg/setup-scala@v11
       with:
-        java-version: '8' # The JDK version to make available on the path.
-        java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
-        architecture: x64 # (x64 or x86) - defaults to x64
+        java-version: "adopt@1.8"
     - name: Cache SBT ivy cache
       uses: actions/cache@v1
       with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-sbt-ivy-cache-${{ hashFiles('**/build.sbt') }}
-    - name: Setup SBT and run test
-      uses: lokkju/github-action-sbt@master
-      with:
-        commands: test
-        sbt_project_directory: ./
+    - name: Build and Test
+      run: sbt test
