@@ -16,7 +16,7 @@ jobs:
         echo '${{ secrets.PGP_KEY }}' | gpg --import --batch --yes
         gpg --batch --pinentry-mode loopback --passphrase ${{ secrets.PGP_PASSPHRASE }} --detach-sign --armor --use-agent --default-key ${{ secrets.PGP_DEFAULT_KEY_ID }} --output test1.txt.asc test1.txt
     - uses: actions/checkout@v2
-    - uses: olafurpg/setup-scala@v10
+    - uses: olafurpg/setup-scala@v11
     - name: Build code and package
       run: |
         sbt clean test package genDigdagShell
