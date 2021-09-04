@@ -2,7 +2,7 @@ import scala.sys.process._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val scala213 = "2.13.4"
+lazy val scala213 = "2.13.6"
 
 lazy val genDigdagShell: TaskKey[Unit] = taskKey[Unit]("Generate digdag-shell executable")
 
@@ -68,7 +68,7 @@ lazy val client_lib = (project in file("digdag-client"))
       "org.scalaj" %% "scalaj-http" % "2.4.2",
       "com.typesafe.play" %% "play-json" % "2.9.2" excludeAll(excludeJackson),
       "org.apache.commons" % "commons-compress" % "1.20",
-      "commons-io" % "commons-io" % "2.10.0",
+      "commons-io" % "commons-io" % "2.11.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
       "org.scalatest" %% "scalatest" % "3.2.9" % Test,
