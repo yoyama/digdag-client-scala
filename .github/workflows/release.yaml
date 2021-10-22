@@ -19,14 +19,14 @@ jobs:
     - uses: olafurpg/setup-scala@v11
     - name: Build code and package
       run: |
-        sbt clean test package genDigdagShell
+        sbt +clean +test +package genDigdagShell
     - name: publishSigned
       env:
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
         SONATYPE_USERNAME: '${{ secrets.SONATYPE_USER }}'
         SONATYPE_PASSWORD: '${{ secrets.SONATYPE_PASS }}'
       run: |
-        sbt client_lib/publishSigned
+        sbt +client_lib/publishSigned
         sbt shell/publishSigned
     - name: Prepare for creation of release
       run: |

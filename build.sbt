@@ -3,12 +3,14 @@ import scala.sys.process._
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 lazy val scala213 = "2.13.6"
+lazy val scala212 = "2.12.15"
+lazy val supportedScalaVersions = List(scala213, scala212)
 
 lazy val genDigdagShell: TaskKey[Unit] = taskKey[Unit]("Generate digdag-shell executable")
 
 lazy val commonSettings = Seq(
-  test in assembly := {},
-  assemblyMergeStrategy in assembly := {
+  assembly / test := {},
+  assembly / assemblyMergeStrategy := {
     //case PathList(ps@_*) if ps.last contains "io.netty.versions.properties" => MergeStrategy.first
     case x if x contains "io.netty.versions.properties" => MergeStrategy.first
     case "module-info.class" => MergeStrategy.discard
@@ -19,7 +21,7 @@ lazy val commonSettings = Seq(
   },
 )
 ThisBuild / scalaVersion     := scala213
-ThisBuild / version          := "0.1.0-SNAPSHOT"
+ThisBuild / version          := "0.2.0-SNAPSHOT"
 ThisBuild / organization     := "io.github.yoyama"
 ThisBuild / organizationName := "yoyama"
 ThisBuild / description      := "Scala client library for Digdag"
@@ -54,7 +56,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "digdag-client-scala",
     testFrameworks += new TestFramework("wvlet.airspec.Framework"),
-    test in assembly := {}
+    crossScalaVersions := Nil
   )
 
 lazy val airframeVersion = "21.3.1"
@@ -75,7 +77,8 @@ lazy val client_lib = (project in file("digdag-client"))
       "org.scalactic" %% "scalactic" % "3.2.10" % Test,
       "org.mockito" % "mockito-all" % "1.10.19" % Test
     ),
-    testFrameworks += new TestFramework("wvlet.airspec.Framework")
+    testFrameworks += new TestFramework("wvlet.airspec.Framework"),
+    crossScalaVersions := supportedScalaVersions
     //fork in run := true
   )
 
@@ -96,6 +99,7 @@ lazy val shell = (project in file("digdag-shell"))
       println("genDigdagShell called")
       "bin/gen_shell.sh" !
     },
+    crossScalaVersions := List(scala213),
   )
   .dependsOn(client_lib)
 
