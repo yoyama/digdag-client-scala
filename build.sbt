@@ -59,7 +59,7 @@ lazy val root = (project in file("."))
     crossScalaVersions := Nil
   )
 
-lazy val airframeVersion = "21.3.1"
+lazy val airframeVersion = "21.12.0"
 val excludeJackson = ExclusionRule(organization = "com.fasterxml.jackson")
 
 lazy val client_lib = (project in file("digdag-client"))
