@@ -1,5 +1,5 @@
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "1.1.0")
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.9.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.9.3")
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.10.0-RC1")
 //addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
