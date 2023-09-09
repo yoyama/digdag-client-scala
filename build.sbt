@@ -69,7 +69,7 @@ lazy val client_lib = (project in file("digdag-client"))
     libraryDependencies ++= Seq(
       "org.scalaj" %% "scalaj-http" % "2.4.2",
       "com.typesafe.play" %% "play-json" % "2.9.2" excludeAll(excludeJackson),
-      "org.apache.commons" % "commons-compress" % "1.21",
+      "org.apache.commons" % "commons-compress" % "1.24.0",
       "commons-io" % "commons-io" % "2.11.0",
       "org.wvlet.airframe" %% "airframe-log" % airframeVersion,
       "org.wvlet.airframe" %% "airframe-http-finagle" % airframeVersion  % Test,
