@@ -3,7 +3,7 @@ import scala.sys.process._
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 lazy val scala213 = "2.13.6"
-lazy val scala212 = "2.12.15"
+lazy val scala212 = "2.12.19"
 lazy val supportedScalaVersions = List(scala213, scala212)
 
 lazy val genDigdagShell: TaskKey[Unit] = taskKey[Unit]("Generate digdag-shell executable")
